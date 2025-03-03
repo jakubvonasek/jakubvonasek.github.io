@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jakub Vonášek - CV</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="js/main.js"></script>
+  <script src="js/main.js" defer></script>
 </head>
 <body>
   <div class="header">
     <h1>Jakub Vonášek</h1>
-    <p>AI and software engineer specializing in machine learning and AI-driven applications.</p>
+    <p>AI and software engineer specializing in machine learning and fun web applications.</p>
     
     <div class="contact">
       <a href="mailto:jkb.vonasek@gmail.com">
@@ -36,7 +36,7 @@
       <ul>
         <li>Developing AI-driven applications for businesses</li>
         <li>Implementing machine learning models</li>
-        <li>Creating and maintaining a responsive website using Next.js</li>
+        <li>Building fun and interactive websites</li>
       </ul>
     </div>
   </div>
@@ -54,12 +54,19 @@
   
   <div class="section">
     <h2>Skills</h2>
-    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-      <span style="background: rgba(59, 130, 246, 0.1); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: var(--radius);">Machine Learning</span>
-      <span style="background: rgba(59, 130, 246, 0.1); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: var(--radius);">AI</span>
-      <span style="background: rgba(59, 130, 246, 0.1); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: var(--radius);">Software Engineering</span>
-      <span style="background: rgba(59, 130, 246, 0.1); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: var(--radius);">Next.js</span>
-      <span style="background: rgba(59, 130, 246, 0.1); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: var(--radius);">Optimization</span>
+    <div class="skills-container">
+      <span class="skill-tag">Machine Learning</span>
+      <span class="skill-tag">AI</span>
+      <span class="skill-tag">Software Engineering</span>
+      <span class="skill-tag">Web Development</span>
+      <span class="skill-tag">Optimization</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Projects</h2>
+    <div id="projects-container">
+      <!-- Projects will be loaded from projects.js -->
     </div>
   </div>
 </body>
