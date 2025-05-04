@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   output: 'export',
-  basePath: '',
+  basePath: '/jakubvonasek.github.io',
   images: {
     unoptimized: true,
   },
