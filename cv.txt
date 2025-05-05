@@ -1,10 +1,34 @@
-Jakub.dev
+Jakub Vonášek
 
-About
 
-Full-stack developer, AI builder, and digital designer. I craft purposeful web and data-driven experiences—mixing deep tech with creative experimentation. Founder of GAIA, now evolving into PRAGUE LIVE, where tech meets climate action and ambient interactivity.
+22yo.
 
-Projects
+
+AI developer and a digital nomad. 
+
+
+Building webapps and indie hacking to $10k MRR.
+
+Web-Profile:
+https://jakubvonasek.github.io
+
+Curently building:
+
+# www.mrrvizualizer.io/jakubvonasek
+# www.wikimediawrapper.io/search?=python
+
+Past projects:
+
+Live Earth Visualizer: https://gaia-globe.onrender.com
+
+
+Backlog:
+
+AR Showcase
+# www.turnajegolfu.cz
+
+
+
 
 🌱 GAIA / PRAGUE LIVE
 
@@ -18,7 +42,7 @@ A Python-based web app that visualizes trending pages and temporal patterns from
 Stack: Python, Flask, Plotly, Wikimedia API
 View Project
 
-🧾 LEI Status Checker
+🧾 RAG Tool implementation
 
 A tool for verifying and displaying legal entity registration statuses based on Czech ICOs and LEIs. Combines SQL queries, clean enums, and message logic.
 Stack: Python, MySQL, MAMP
