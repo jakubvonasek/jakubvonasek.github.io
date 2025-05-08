@@ -1,112 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="manifest" href="site.webmanifest">
-  <title>Jakub.dev - Full Stack Developer</title>
+
+  <title>Jakub.dev | Full‑Stack Developer &amp; AI Specialist Portfolio</title>
+
+  <!-- Primary SEO Meta Tags -->
+  <meta name="description" content="Portfolio of Jakub Vonášek – Full‑Stack developer, AI specialist and digital nomad. Explore projects, skills and contact details." />
+  <meta name="keywords" content="Jakub Vonášek, Jakub.dev, full‑stack developer, AI specialist, web developer, portfolio, Prague developer" />
+  <meta name="author" content="Jakub Vonášek" />
+  <link rel="canonical" href="https://jakub.dev/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://jakub.dev/" />
+  <meta property="og:title" content="Jakub.dev | Full‑Stack Developer &amp; AI Specialist Portfolio" />
+  <meta property="og:description" content="Portfolio of Jakub Vonášek – Full‑Stack developer, AI specialist and digital nomad. Explore projects, skills and contact details." />
+  <!-- Replace og:image with a real social‑sharing image (1200×630) -->
+  <meta property="og:image" content="https://jakub.dev/og-image.jpg" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://jakub.dev/" />
+  <meta name="twitter:title" content="Jakub.dev | Full‑Stack Developer &amp; AI Specialist Portfolio" />
+  <meta name="twitter:description" content="Portfolio of Jakub Vonášek – Full‑Stack developer, AI specialist and digital nomad." />
+  <meta name="twitter:image" content="https://jakub.dev/og-image.jpg" />
+
+  <!-- Icons & Manifest -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
+  <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <!-- Theme Colors (light & dark) -->
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+
+  <!-- Structured Data → Person -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Jakub Vonášek",
+    "alternateName": "Jakub.dev",
+    "url": "https://jakub.dev",
+    "image": "https://jakub.dev/og-image.jpg",
+    "jobTitle": "Full‑Stack Developer & AI Specialist",
+    "makesOffer": {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Web Application Development & AI Integration"
+      }
+    },
+    "sameAs": [
+      "https://github.com/jakubvonasek",
+      "https://x.com/vonasekjakub",
+      "https://www.youtube.com/@jakubvonasek"
+    ],
+    "worksFor": {
+      "@type": "Organization",
+      "name": "STYRAX Consulting"
+    },
+    "knowsAbout": [
+      "Full‑Stack Development",
+      "Artificial Intelligence",
+      "Automation",
+      "Web Applications"
+    ]
+  }
+  </script>
+
   <style>
-    body {
-      background-color: #0a0a0a;
-      color: #fff;
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-light: #ffffff;
+      --text-dark: #0a0a0a;
+      --text-light: #ffffff;
+      --accent: #4dabf7;
     }
+
+    /* Base */
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    }
+
     @media (prefers-color-scheme: light) {
       body {
-        background-color: #fff;
-        color: #0a0a0a;
+        background-color: var(--bg-light);
+        color: var(--text-dark);
       }
-      nav, footer {
-        background-color: #fff !important;
-        color: #0a0a0a !important;
+      nav,
+      footer {
+        background-color: var(--bg-light) !important;
+        color: var(--text-dark) !important;
       }
-      section, div[style*='background-color: #1a1a1a'] {
+      section,
+      div[style*="background-color: #1a1a1a"] {
         background-color: #f5f5f5 !important;
-        color: #0a0a0a !important;
+        color: var(--text-dark) !important;
       }
       a {
-        color: #0a0a0a !important;
+        color: var(--text-dark) !important;
       }
+    }
+
+    a {
+      transition: color 0.2s ease;
+    }
+    a:hover {
+      color: var(--accent);
+    }
+
+    /* Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
     }
   </style>
 </head>
-<body style="margin: 0; background-color: #0a0a0a; color: #ffffff; font-family: sans-serif;">
-
-  <!-- Navbar -->
-  <nav style="display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background-color: #0a0a0a;">
-    <div style="font-weight: bold; font-size: 18px;">Jakub.dev</div>
-    <div>
-      <a href="#about" style="margin-right: 20px; color: #ccc; text-decoration: none;">About</a>
-      <a href="#projects" style="margin-right: 20px; color: #ccc; text-decoration: none;">Projects</a>
-      <a href="#contact" style="color: #ccc; text-decoration: none;">Contact</a>
-    </div>
-  </nav>
-
-  <!-- Hero Section -->
-  <section style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 0 20px;">
-    <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 16px;">Full Stack Developer,</h1>
-    <p style="max-width: 600px; color: #aaa; font-size: 18px; line-height: 1.5;">
-      AI specialist and a digital nomad. Building webapps, expert systems, full-stack solutions, and more.
-    </p>
-    <div style="margin-top: 24px; display: flex; gap: 16px;">
-      <a href="https://github.com/jakubvonasek/" style="border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; text-decoration: none;">
-        <svg width=">18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-        Github Profile
-        
-      </a>
-      <a href="https://x.com/vonasekjakub" style="border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; text-decoration: none;">
-         
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        Follow
-      </a>
-      <a href="https://www.youtube.com/@jakubvonasek" style="border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; text-decoration: none;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-        YouTube Channel
-      </a>
-    </div>
-  </section>
-
-  <!-- Projects Section -->
-  <section id="projects" style="padding: 60px 20px; text-align: center;">
-    <h2 style="font-size: 32px; margin-bottom: 40px;">Projects</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto;">
-      <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px;">
-        <h3 style="font-size: 20px; margin-bottom: 10px;">GAIA</h3>
-        <img src="gaia.webp" alt="GAIA showcase" style="width: 100%; border-radius: 4px; margin-bottom: 10px;">
-        <p style="color: #aaa;">Interactive globe visualizer, live news feed, and more.</p>
-        <a href="https://gaia-globe.onrender.com" style="color: #4dabf7; text-decoration: none;">visit project →</a>
+<body>
+  <!-- Header & Navigation -->
+  <header>
+    <nav aria-label="Primary" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background-color: #0a0a0a;">
+      <div style="font-weight: bold; font-size: 18px;">Jakub.dev</div>
+      <div>
+        <a href="#about" style="margin-right: 20px; color: #ccc; text-decoration: none;">About</a>
+        <a href="#projects" style="margin-right: 20px; color: #ccc; text-decoration: none;">Projects</a>
+        <a href="#contact" style="color: #ccc; text-decoration: none;">Contact</a>
       </div>
-      <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px;">
-        <h3 style="font-size: 20px; margin-bottom: 10px;">MRR Visualizer</h3>
-        <img src="mrr_viz.webp" alt="MRR Visualizer showcase" style="width: 100%; border-radius: 4px; margin-bottom: 10px;">
-        <p style="color: #aaa;">Simple visualization of monthly recurring revenue.</p>
-        <a href="https://studio--mrr-vision.us-central1.hosted.app" style="color: #4dabf7; text-decoration: none;">visit project →</a>
-      </div>
-      <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px;">
-        <h3 style="font-size: 20px; margin-bottom: 10px;">PRAGUE LIVE</h3>
-        <p style="color: #aaa;">Interactive map of Prague, showing live events and activities.</p>
-      </div>
-    </div>
-  </section>
+    </nav>
+  </header>
 
-  <!-- Contact Section -->
-  <section id="contact" style="padding: 60px 20px; text-align: center;">
-    <h2 style="font-size: 32px; margin-bottom: 24px;">Get in Touch</h2>
-    <p style="color: #ccc; max-width: 600px; margin: 0 auto 24px;">
-      Open to freelance, open-source collaboration, and bold ideas. Especially interested AI driven automatization, ml integration and basically anything useful.
-    </p>
-    <p><a href="mailto:jkb.vonasek@gmail.com" style="color: #4dabf7; text-decoration: none;">jkb.vonasek@gmail.com</a></p>
-  </section>
+  <main id="content">
+    <!-- Hero Section -->
+    <section id="about" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 0 20px;">
+      <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 16px;">Full‑Stack Developer<span class="sr-only">,</span></h1>
+      <p style="max-width: 600px; color: #aaa; font-size: 18px; line-height: 1.5;">
+        AI specialist and digital nomad. Building web apps, expert systems, full‑stack solutions and more.
+      </p>
+      <div style="margin-top: 24px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+        <a href="https://github.com/jakubvonasek" rel="noopener noreferrer" style="border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="https://x.com/vonasekjakub" rel="noopener noreferrer" style="border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X / Twitter
+        </a>
+        <a href="https://www.youtube.com/@jakubvonasek" rel="noopener noreferrer" style="border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          YouTube
+        </a>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" style="padding: 60px 20px; text-align: center;">
+      <h2 style="font-size: 32px; margin-bottom: 40px;">Projects</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto;">
+        <article style="background-color: #1a1a1a; padding: 20px; border-radius: 8px;">
+          <h3 style="font-size: 20px; margin-bottom: 10px;">GAIA</h3>
+          <img src="gaia.webp" alt="GAIA – interactive globe visualizer screenshot" style="width: 100%; border-radius: 4px; margin-bottom: 10px;" loading="lazy" />
+          <p style="color: #aaa;">Interactive globe visualizer, live news feed and more.</p>
+          <a href="https://gaia-globe.onrender.com" style="color: var(--accent); text-decoration: none;" rel="noopener noreferrer">Visit project →</a>
+        </article>
+        <article style="background-color: #1a1a1a; padding: 20px; border-radius: 8px;">
+          <h3 style="font-size: 20px; margin-bottom: 10px;">MRR Visualizer</h3>
+          <img src="mrr_viz.webp" alt="MRR Visualizer application screenshot" style="width: 100%; border-radius: 4px; margin-bottom: 10px;" loading="lazy" />
+          <p style="color: #aaa;">Simple visualization of monthly recurring revenue.</p>
+          <a href="https://studio--mrr-vision.us-central1.hosted.app" style="color: var(--accent); text-decoration: none;" rel="noopener noreferrer">Visit project →</a>
+        </article>
+        <article style="background-color: #1a1a1a; padding: 20px; border-radius: 8px;">
+          <h3 style="font-size: 20px; margin-bottom: 10px;">PRAGUE LIVE</h3>
+          <p style="color: #aaa;">Interactive map of Prague, showcasing live events and activities.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" style="padding: 60px 20px; text-align: center;">
+      <h2 style="font-size: 32px; margin-bottom: 24px;">Get in Touch</h2>
+      <p style="color: #ccc; max-width: 600px; margin: 0 auto 24px;">
+        Open to freelance, open‑source collaboration and bold ideas. Especially interested in AI‑driven automation, ML integration and basically anything useful.
+      </p>
+      <p><a href="mailto:jkb.vonasek@gmail.com" style="color: var(--accent); text-decoration: none;">jkb.vonasek@gmail.com</a></p>
+    </section>
+  </main>
 
   <!-- Footer -->
-  <footer style="text-align: center; padding: 20px; color: #666; font-size: 14px;">
-    <p>© 2025 Jakub.dev. All rights reserved.</p>
+  <footer style="text-align: center; padding: 20px; color: #666; font-size: 14px; background-color: #0a0a0a;">
+    <p>© <span id="year">2025</span> Jakub.dev. All rights reserved.</p>
     <p>Follow your dreams.</p>
   </footer>
 
+  <script>
+    // Replace the hard‑coded year automatically
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
