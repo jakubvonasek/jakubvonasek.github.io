@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Minesweeper 4x3</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            transition: all 0.3s;
+        }
+        
+        body.genetic {
+            background: #2a1a3a;
+        }
+        
+        .genetic h1 {
+            color: #aa55ff !important;
+            text-shadow: 0 0 10px #aa55ff !important;
+        }
+        
+        .genetic .game-container {
+            box-shadow: 0 0 20px rgba(170,85,255,0.3) !important;
+        }
+        
+        .genetic .grid {
+            border: 2px solid #aa55ff !important;
+        }
+        
+        .genetic button {
+            background: #aa55ff !important;
+        }
+        
+        .genetic button:hover {
+            background: #8833cc !important;
+        }
+        
+        h1 {
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+            margin-bottom: 10px;
+        }
+        
+        .game-container {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            margin-bottom: 15px;
+            border: 2px solid #00ff88;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .cell {
+            width: min(12vw, 80px);
+            height: min(12vw, 80px);
+            border: 1px solid #444;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: min(3vw, 24px);
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .cell:hover {
+            background: #444;
+            transform: scale(1.05);
+        }
+        
+        .cell.revealed {
+            background: #555;
+            cursor: default;
+        }
+        
+        .cell.mine {
+            background: #ff4444;
+            color: #fff;
+            animation: explode 0.5s ease-out;
+        }
+        
+        .cell.flagged {
+            background: #ffaa00;
+            color: #000;
+        }
+        
+        .cell.safe {
+            background: #00aa44;
+            color: #fff;
+        }
+        
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); background: #ff6666; }
+            100% { transform: scale(1); }
+        }
+        
+        .ai-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #00cc66;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #666;
+            color: #aaa;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .ai-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .bot-log {
+            margin-top: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 15px;
+            width: 400px;
+            max-width: 90vw;
+        }
+        
+        .genetic .bot-log {
+            background: #3a2a4a;
+        }
+        
+        .bot-log h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #00ff88;
+        }
+        
+        .genetic .bot-log h3 {
+            color: #aa55ff;
+        }
+        
+        .log-entry {
+            font-size: 11px;
+            margin: 3px 0;
+            color: #ccc;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+        }
+        
+        .number-1 { color: #4488ff; }
+        .number-2 { color: #44ff44; }
+        .number-3 { color: #ff4444; }
+        .number-4 { color: #aa44ff; }
+        .number-5 { color: #ffaa00; }
+    </style>
+</head>
+<body>
+    <h1 id="title">🤖 AI Minesweeper 4x3</h1>
+    
+    <button onclick="toggleMode()" id="mode-btn">🧬 Genetic Mode</button>
+    
+    <div class="game-container">
+        <div class="stats">
+            <span>💣 Miny: <span id="mines-count">3</span></span>
+            <span>🚩 Vlajky: <span id="flags-count">0</span></span>
+            <span>⏱️ Čas: <span id="timer">0</span>s</span>
+        </div>
+        
+        <div class="grid" id="grid"></div>
+        
+        <div class="ai-status" id="ai-status">AI čeká na instrukce...</div>
+    </div>
+    
+    <div id="bot-log" class="bot-log">
+        <h3>🤖 Bot Log (Last 5)</h3>
+        <div id="log-content"></div>
+    </div>
+
+    <script>
+        // CONFIG
+        const CONFIG = {
+            GAME_SPEED: 200,  // ms between AI moves
+            RESET_DELAY: 800, // ms after explosion
+            AUTO_START_DELAY: 300, // ms before auto start
+            WIN_DELAY: 1000 // ms after win
+        };
+        
+        const BOT_NAMES = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Zeta', 'Sigma', 'Omega', 'Nova', 'Apex', 'Zero', 'Prime', 'Core', 'Neo', 'Byte', 'Logic', 'Quantum', 'Vector', 'Matrix', 'Cipher', 'Neural'];
+        
+        let geneticMode = false;
+        let botLog = [];
+        let generation = 1;
+        let genePool = [];
+        
+        class MinesweeperAI {
+            constructor() {
+                this.rows = 3;
+                this.cols = 4;
+                this.mineCount = 3;
+                this.grid = [];
+                this.revealed = [];
+                this.flagged = [];
+                this.gameOver = false;
+                this.gameWon = false;
+                this.startTime = null;
+                this.timer = null;
+                this.autoPlayActive = true;
+                this.startAutoPlay();
+                
+                this.initGame();
+                this.renderGrid();
+            }
+            
+            initGame() {
+                // Initialize grids
+                this.grid = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+                this.revealed = Array(this.rows).fill().map(() => Array(this.cols).fill(false));
+                this.flagged = Array(this.rows).fill().map(() => Array(this.cols).fill(false));
+                
+                // Place mines randomly
+                let minesPlaced = 0;
+                while (minesPlaced < this.mineCount) {
+                    const r = Math.floor(Math.random() * this.rows);
+                    const c = Math.floor(Math.random() * this.cols);
+                    
+                    if (this.grid[r][c] !== -1) {
+                        this.grid[r][c] = -1; // -1 represents mine
+                        minesPlaced++;
+                    }
+                }
+                
+                // Calculate numbers
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        if (this.grid[r][c] !== -1) {
+                            this.grid[r][c] = this.countAdjacentMines(r, c);
+                        }
+                    }
+                }
+                
+                this.gameOver = false;
+                this.gameWon = false;
+                this.startTime = Date.now();
+                this.startTimer();
+                this.updateStats();
+                this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} (${this.wins} výher) začíná...`);
+            }
+            
+            countAdjacentMines(row, col) {
+                let count = 0;
+                for (let r = row - 1; r <= row + 1; r++) {
+                    for (let c = col - 1; c <= col + 1; c++) {
+                        if (r >= 0 && r < this.rows && c >= 0 && c < this.cols) {
+                            if (this.grid[r][c] === -1) count++;
+                        }
+                    }
+                }
+                return count;
+            }
+            
+            startTimer() {
+                if (this.timer) clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    if (!this.gameOver) {
+                        const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                        document.getElementById('timer').textContent = elapsed;
+                    }
+                }, 1000);
+            }
+            
+            renderGrid() {
+                const gridElement = document.getElementById('grid');
+                gridElement.innerHTML = '';
+                
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = r;
+                        cell.dataset.col = c;
+                        
+                        if (this.flagged[r][c]) {
+                            cell.classList.add('flagged');
+                            cell.textContent = '🚩';
+                        } else if (this.revealed[r][c]) {
+                            cell.classList.add('revealed');
+                            if (this.grid[r][c] === -1) {
+                                cell.classList.add('mine');
+                                cell.textContent = '💣';
+                            } else if (this.grid[r][c] > 0) {
+                                cell.textContent = this.grid[r][c];
+                                cell.classList.add(`number-${this.grid[r][c]}`);
+                            }
+                        }
+                        
+                        cell.addEventListener('click', (e) => this.handleClick(r, c));
+                        cell.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            this.toggleFlag(r, c);
+                        });
+                        
+                        gridElement.appendChild(cell);
+                    }
+                }
+            }
+            
+            handleClick(row, col) {
+                if (this.gameOver || this.revealed[row][col] || this.flagged[row][col]) return;
+                
+                this.revealCell(row, col);
+            }
+            
+            revealCell(row, col) {
+                if (this.revealed[row][col] || this.flagged[row][col]) return;
+                
+                this.revealed[row][col] = true;
+                
+                if (this.grid[row][col] === -1) {
+                    this.gameOver = true;
+                    this.setStatus(`💥 ${this.botName} explodoval! ${geneticMode ? 'Mutating genome...' : 'Spawning nový bot...'}`);
+                    this.renderGrid();
+                    setTimeout(() => this.resetGame(), CONFIG.RESET_DELAY);
+                    return;
+                }
+                
+                if (this.grid[row][col] === 0) {
+                    // Auto-reveal adjacent cells
+                    for (let r = row - 1; r <= row + 1; r++) {
+                        for (let c = col - 1; c <= col + 1; c++) {
+                            if (r >= 0 && r < this.rows && c >= 0 && c < this.cols) {
+                                this.revealCell(r, c);
+                            }
+                        }
+                    }
+                }
+                
+                this.checkWin();
+                this.renderGrid();
+            }
+            
+            toggleFlag(row, col) {
+                if (this.gameOver || this.revealed[row][col]) return;
+                
+                this.flagged[row][col] = !this.flagged[row][col];
+                this.updateStats();
+                this.renderGrid();
+            }
+            
+            updateStats() {
+                const flagsUsed = this.flagged.flat().filter(f => f).length;
+                document.getElementById('flags-count').textContent = flagsUsed;
+                document.getElementById('mines-count').textContent = this.mineCount;
+            }
+            
+            checkWin() {
+                let revealedCount = 0;
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        if (this.revealed[r][c] && this.grid[r][c] !== -1) {
+                            revealedCount++;
+                        }
+                    }
+                }
+                
+                if (revealedCount === (this.rows * this.cols - this.mineCount)) {
+                    this.gameWon = true;
+                    this.gameOver = true;
+                    this.wins++;
+                    this.setStatus(`🎉 ${this.botName} vyhrál! (${this.wins} výher celkem)`);
+                    this.logBot('WIN');
+                    setTimeout(() => this.resetGame(), CONFIG.WIN_DELAY);
+                }
+            }
+            
+            // Advanced AI logic
+            makeAIMove() {
+                if (this.gameOver) return;
+                
+                const move = geneticMode ? this.calculateGeneticMove() : this.calculateBestMove();
+                if (move) {
+                    if (move.action === 'reveal') {
+                        this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} odhaluje [${move.row + 1}, ${move.col + 1}]`);
+                        this.revealCell(move.row, move.col);
+                    } else if (move.action === 'flag') {
+                        this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} označuje minu [${move.row + 1}, ${move.col + 1}]`);
+                        this.toggleFlag(move.row, move.col);
+                    }
+                } else {
+                    // Random safe guess as fallback
+                    const safeCells = this.findUnrevealedCells().filter(cell => !this.flagged[cell.row][cell.col]);
+                    if (safeCells.length > 0) {
+                        const randomCell = safeCells[Math.floor(Math.random() * safeCells.length)];
+                        this.setStatus(`🎲 ${this.botName} hádá náhodně [${randomCell.row + 1}, ${randomCell.col + 1}]`);
+                        this.revealCell(randomCell.row, randomCell.col);
+                    }
+                }
+            }
+            
+            calculateBestMove() {
+                // Strategy 1: Look for guaranteed safe cells
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        if (this.revealed[r][c] && this.grid[r][c] > 0) {
+                            const adjacentCells = this.getAdjacentCells(r, c);
+                            const unrevealedCells = adjacentCells.filter(cell => !this.revealed[cell.row][cell.col] && !this.flagged[cell.row][cell.col]);
+                            const flaggedCells = adjacentCells.filter(cell => this.flagged[cell.row][cell.col]);
+                            
+                            // If we've flagged enough mines around this number, reveal remaining cells
+                            if (flaggedCells.length === this.grid[r][c] && unrevealedCells.length > 0) {
+                                return { action: 'reveal', row: unrevealedCells[0].row, col: unrevealedCells[0].col };
+                            }
+                            
+                            // If unrevealed cells equal remaining mines, flag them
+                            if (unrevealedCells.length === this.grid[r][c] - flaggedCells.length && unrevealedCells.length > 0) {
+                                return { action: 'flag', row: unrevealedCells[0].row, col: unrevealedCells[0].col };
+                            }
+                        }
+                    }
+                }
+                
+                // Strategy 2: Probability analysis for remaining cells
+                const unrevealedCells = this.findUnrevealedCells().filter(cell => !this.flagged[cell.row][cell.col]);
+                if (unrevealedCells.length > 0) {
+                    const probabilities = this.calculateMineProbabilities();
+                    const safestCell = unrevealedCells.reduce((safest, cell) => 
+                        probabilities[cell.row][cell.col] < probabilities[safest.row][safest.col] ? cell : safest
+                    );
+                    
+                    if (probabilities[safestCell.row][safestCell.col] < 0.3) {
+                        return { action: 'reveal', row: safestCell.row, col: safestCell.col };
+                    }
+                }
+                
+                return null;
+            }
+            
+            calculateMineProbabilities() {
+                const probabilities = Array(this.rows).fill().map(() => Array(this.cols).fill(0.25)); // Base probability
+                
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        if (this.revealed[r][c] && this.grid[r][c] > 0) {
+                            const adjacentCells = this.getAdjacentCells(r, c);
+                            const unrevealedCells = adjacentCells.filter(cell => !this.revealed[cell.row][cell.col] && !this.flagged[cell.row][cell.col]);
+                            const flaggedCount = adjacentCells.filter(cell => this.flagged[cell.row][cell.col]).length;
+                            
+                            if (unrevealedCells.length > 0) {
+                                const remainingMines = this.grid[r][c] - flaggedCount;
+                                const probability = remainingMines / unrevealedCells.length;
+                                
+                                unrevealedCells.forEach(cell => {
+                                    probabilities[cell.row][cell.col] = Math.max(probabilities[cell.row][cell.col], probability);
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                return probabilities;
+            }
+            
+            getAdjacentCells(row, col) {
+                const cells = [];
+                for (let r = row - 1; r <= row + 1; r++) {
+                    for (let c = col - 1; c <= col + 1; c++) {
+                        if (r >= 0 && r < this.rows && c >= 0 && c < this.cols && !(r === row && c === col)) {
+                            cells.push({ row: r, col: c });
+                        }
+                    }
+                }
+                return cells;
+            }
+            
+            findUnrevealedCells() {
+                const cells = [];
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        if (!this.revealed[r][c]) {
+                            cells.push({ row: r, col: c });
+                        }
+                    }
+                }
+                return cells;
+            }
+            
+            startAutoPlay() {
+                const autoStep = () => {
+                    if (this.gameOver) return;
+                    this.makeAIMove();
+                    if (!this.gameOver) setTimeout(autoStep, CONFIG.GAME_SPEED);
+                };
+                setTimeout(autoStep, CONFIG.GAME_SPEED);
+            }
+            
+            resetGame() {
+                if (this.timer) clearInterval(this.timer);
+                if (!this.gameWon) {
+                    this.logBot('DEATH');
+                    if (geneticMode) {
+                        this.botName = this.generateBotName();
+                        this.genome = this.mutateGenome();
+                        this.wins = 0;
+                    } else {
+                        this.botName = this.generateBotName();
+                        this.wins = 0;
+                    }
+                }
+                this.initGame();
+                this.renderGrid();
+                setTimeout(() => this.startAutoPlay(), CONFIG.AUTO_START_DELAY);
+            }
+            
+            generateBotName() {
+                return BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] + '-' + Math.floor(Math.random() * 1000);
+            }
+            
+            generateGenome() {
+                return {
+                    riskTolerance: Math.random(),     // 0-1: tolerance for risky moves
+                    cornerPreference: Math.random(),  // 0-1: preference for corner moves  
+                    centerWeight: Math.random(),      // 0-1: weight for center positions
+                    patternWeight: Math.random(),     // 0-1: how much to trust patterns
+                    randomFactor: Math.random()       // 0-1: randomness in decisions
+                };
+            }
+            
+            mutateGenome() {
+                if (!this.genome) return this.generateGenome();
+                const mutated = {...this.genome};
+                const mutationRate = 0.3;
+                
+                Object.keys(mutated).forEach(key => {
+                    if (Math.random() < mutationRate) {
+                        mutated[key] = Math.max(0, Math.min(1, mutated[key] + (Math.random() - 0.5) * 0.4));
+                    }
+                });
+                return mutated;
+            }
+            
+            calculateGeneticMove() {
+                const standardMove = this.calculateBestMove();
+                if (standardMove) return standardMove;
+                
+                const unrevealedCells = this.findUnrevealedCells().filter(cell => !this.flagged[cell.row][cell.col]);
+                if (unrevealedCells.length === 0) return null;
+                
+                // Score cells based on genome
+                const scoredCells = unrevealedCells.map(cell => {
+                    let score = 0;
+                    
+                    // Corner preference
+                    if ((cell.row === 0 || cell.row === this.rows-1) && (cell.col === 0 || cell.col === this.cols-1)) {
+                        score += this.genome.cornerPreference * 0.3;
+                    }
+                    
+                    // Center preference
+                    const centerDist = Math.abs(cell.row - this.rows/2) + Math.abs(cell.col - this.cols/2);
+                    score += this.genome.centerWeight * (1 - centerDist / (this.rows + this.cols)) * 0.2;
+                    
+                    // Random factor
+                    score += Math.random() * this.genome.randomFactor * 0.5;
+                    
+                    return {cell, score};
+                });
+                
+                scoredCells.sort((a, b) => b.score - a.score);
+                const bestCell = scoredCells[0].cell;
+                
+                return { action: 'reveal', row: bestCell.row, col: bestCell.col };
+            }
+            
+            logBot(result) {
+                const entry = {
+                    name: this.botName,
+                    result: result,
+                    wins: this.wins,
+                    time: new Date().toLocaleTimeString(),
+                    genome: geneticMode ? this.genome : null
+                };
+                
+                botLog.unshift(entry);
+                if (botLog.length > 5) botLog.pop();
+                this.updateBotLog();
+            }
+            
+            updateBotLog() {
+                const logContent = document.getElementById('log-content');
+                logContent.innerHTML = botLog.map(entry => {
+                    const emoji = entry.result === 'WIN' ? '🏆' : '💀';
+                    const genomeStr = entry.genome ? 
+                        `R:${(entry.genome.riskTolerance*100).toFixed(0)} C:${(entry.genome.cornerPreference*100).toFixed(0)}` : '';
+                    return `<div class="log-entry">${emoji} ${entry.name} - ${entry.result} (${entry.wins} wins) ${genomeStr} [${entry.time}]</div>`;
+                }).join('');
+            }
+            
+            setStatus(message) {
+                document.getElementById('ai-status').textContent = message;
+            }
+        }
+        
+        // Global game instance
+        let game = new MinesweeperAI();
+        
+        function toggleMode() {
+            geneticMode = !geneticMode;
+            document.body.classList.toggle('genetic', geneticMode);
+            
+            const title = document.getElementById('title');
+            const btn = document.getElementById('mode-btn');
+            
+            if (geneticMode) {
+                title.textContent = '🧬 Genetic Minesweeper 4x3';
+                btn.textContent = '🤖 Classic Mode';
+            } else {
+                title.textContent = '🤖 AI Minesweeper 4x3';
+                btn.textContent = '🧬 Genetic Mode';
+            }
+            
+            game.resetGame();
+        }
+        
+        // Global functions for buttons
+        function makeAIMove() {
+            game.makeAIMove();
+        }
+        
+        function autoPlay() {
+            game.autoPlay();
+        }
+        
+        function resetGame() {
+            game.resetGame();
+        }
+    </script>
+</body>
+</html> 
