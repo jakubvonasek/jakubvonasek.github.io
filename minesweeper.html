@@ -184,16 +184,20 @@
             color: #ccc;
         }
         
-        button {
-            padding: 8px 16px;
-            background: #00ff88;
-            color: #000;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-            margin-bottom: 15px;
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .footer a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+        
+        .genetic .footer a {
+            color: #aa55ff;
         }
         
         .number-1 { color: #4488ff; }
@@ -223,6 +227,10 @@
     <div id="bot-log" class="bot-log">
         <h3>🤖 Bot Log (Last 5)</h3>
         <div id="log-content"></div>
+    </div>
+
+    <div class="footer">
+        created by <a href="https://jakub-dev.com/" target="_blank">@jakub-dev</a>
     </div>
 
     <script>
