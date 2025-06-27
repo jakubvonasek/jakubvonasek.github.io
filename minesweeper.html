@@ -262,6 +262,7 @@
                 this.startTime = null;
                 this.timer = null;
                 this.autoPlayActive = true;
+                this.firstMove = true;
                 this.startAutoPlay();
                 
                 this.initGame();
@@ -274,19 +275,31 @@
                 this.revealed = Array(this.rows).fill().map(() => Array(this.cols).fill(false));
                 this.flagged = Array(this.rows).fill().map(() => Array(this.cols).fill(false));
                 
-                // Place mines randomly
+                // Mines are placed after the first click.
+                
+                this.gameOver = false;
+                this.gameWon = false;
+                this.startTime = null;
+                if (this.timer) clearInterval(this.timer);
+                document.getElementById('timer').textContent = 0;
+                this.updateStats();
+                this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} (${this.wins} výher) začíná...`);
+            }
+
+            placeMinesAndNumbers(firstRow, firstCol) {
+                // Place mines randomly, avoiding the first clicked cell
                 let minesPlaced = 0;
                 while (minesPlaced < this.mineCount) {
                     const r = Math.floor(Math.random() * this.rows);
                     const c = Math.floor(Math.random() * this.cols);
                     
-                    if (this.grid[r][c] !== -1) {
-                        this.grid[r][c] = -1; // -1 represents mine
+                    if ((r !== firstRow || c !== firstCol) && this.grid[r][c] !== -1) {
+                        this.grid[r][c] = -1; // -1 represents a mine
                         minesPlaced++;
                     }
                 }
                 
-                // Calculate numbers
+                // Calculate numbers for cells adjacent to mines
                 for (let r = 0; r < this.rows; r++) {
                     for (let c = 0; c < this.cols; c++) {
                         if (this.grid[r][c] !== -1) {
@@ -295,12 +308,8 @@
                     }
                 }
                 
-                this.gameOver = false;
-                this.gameWon = false;
                 this.startTime = Date.now();
                 this.startTimer();
-                this.updateStats();
-                this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} (${this.wins} výher) začíná...`);
             }
             
             countAdjacentMines(row, col) {
@@ -368,6 +377,11 @@
             }
             
             revealCell(row, col) {
+                if (this.firstMove) {
+                    this.placeMinesAndNumbers(row, col);
+                    this.firstMove = false;
+                }
+
                 if (this.revealed[row][col] || this.flagged[row][col]) return;
                 
                 this.revealed[row][col] = true;
@@ -433,62 +447,142 @@
             makeAIMove() {
                 if (this.gameOver) return;
                 
+                console.log('--------------------\n[AI] Making a move...');
                 const move = geneticMode ? this.calculateGeneticMove() : this.calculateBestMove();
+                
                 if (move) {
+                    console.log(`[AI] Move decided:`, move);
+                    const reason = move.reason || (move.action === 'reveal' ? 'Probabilistic' : 'Unknown');
                     if (move.action === 'reveal') {
-                        this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} odhaluje [${move.row + 1}, ${move.col + 1}]`);
+                        this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} odhaluje [${move.row + 1}, ${move.col + 1}] (${reason})`);
                         this.revealCell(move.row, move.col);
                     } else if (move.action === 'flag') {
-                        this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} označuje minu [${move.row + 1}, ${move.col + 1}]`);
+                        this.setStatus(`${geneticMode ? '🧬' : '🤖'} ${this.botName} označuje minu [${move.row + 1}, ${move.col + 1}] (${reason})`);
                         this.toggleFlag(move.row, move.col);
                     }
                 } else {
+                    console.log('[AI] No move was decided. This might be the problem!');
                     // Random safe guess as fallback
                     const safeCells = this.findUnrevealedCells().filter(cell => !this.flagged[cell.row][cell.col]);
                     if (safeCells.length > 0) {
                         const randomCell = safeCells[Math.floor(Math.random() * safeCells.length)];
                         this.setStatus(`🎲 ${this.botName} hádá náhodně [${randomCell.row + 1}, ${randomCell.col + 1}]`);
                         this.revealCell(randomCell.row, randomCell.col);
+                    } else {
+                        console.log('[AI] No unrevealed cells left to guess.');
                     }
                 }
             }
             
             calculateBestMove() {
-                // Strategy 1: Look for guaranteed safe cells
+                console.log('[AI] Calculating best move...');
+                // Strategy 1: Find obvious moves (reveal safe cells or flag mines)
                 for (let r = 0; r < this.rows; r++) {
                     for (let c = 0; c < this.cols; c++) {
                         if (this.revealed[r][c] && this.grid[r][c] > 0) {
-                            const adjacentCells = this.getAdjacentCells(r, c);
-                            const unrevealedCells = adjacentCells.filter(cell => !this.revealed[cell.row][cell.col] && !this.flagged[cell.row][cell.col]);
-                            const flaggedCells = adjacentCells.filter(cell => this.flagged[cell.row][cell.col]);
-                            
-                            // If we've flagged enough mines around this number, reveal remaining cells
-                            if (flaggedCells.length === this.grid[r][c] && unrevealedCells.length > 0) {
-                                return { action: 'reveal', row: unrevealedCells[0].row, col: unrevealedCells[0].col };
-                            }
-                            
-                            // If unrevealed cells equal remaining mines, flag them
-                            if (unrevealedCells.length === this.grid[r][c] - flaggedCells.length && unrevealedCells.length > 0) {
-                                return { action: 'flag', row: unrevealedCells[0].row, col: unrevealedCells[0].col };
+                            const adjacent = this.getAdjacentCells(r, c);
+                            const flagged = adjacent.filter(cell => this.flagged[cell.row][cell.col]);
+                            const unrevealed = adjacent.filter(cell => !this.revealed[cell.row][cell.col] && !this.flagged[cell.row][cell.col]);
+
+                            if (unrevealed.length > 0) {
+                                // All mines are flagged, remaining cells are safe
+                                if (this.grid[r][c] === flagged.length) {
+                                    console.log(`[AI] Strategy 1: Found obvious safe cell at [${unrevealed[0].row + 1}, ${unrevealed[0].col + 1}]`);
+                                    return { action: 'reveal', row: unrevealed[0].row, col: unrevealed[0].col, reason: 'Obvious Safe' };
+                                }
+                                // All remaining unrevealed cells must be mines
+                                if (this.grid[r][c] - flagged.length === unrevealed.length) {
+                                    console.log(`[AI] Strategy 1: Found obvious mine at [${unrevealed[0].row + 1}, ${unrevealed[0].col + 1}]`);
+                                    return { action: 'flag', row: unrevealed[0].row, col: unrevealed[0].col, reason: 'Obvious Mine' };
+                                }
                             }
                         }
                     }
                 }
-                
-                // Strategy 2: Probability analysis for remaining cells
-                const unrevealedCells = this.findUnrevealedCells().filter(cell => !this.flagged[cell.row][cell.col]);
-                if (unrevealedCells.length > 0) {
-                    const probabilities = this.calculateMineProbabilities();
-                    const safestCell = unrevealedCells.reduce((safest, cell) => 
-                        probabilities[cell.row][cell.col] < probabilities[safest.row][safest.col] ? cell : safest
-                    );
-                    
-                    if (probabilities[safestCell.row][safestCell.col] < 0.3) {
-                        return { action: 'reveal', row: safestCell.row, col: safestCell.col };
+                console.log('[AI] Strategy 1: No obvious moves found.');
+
+                // Strategy 2: Advanced logic - compare adjacent numbered cells
+                const revealedNumberedCells = this.findRevealedNumberedCells();
+                for (const cell1 of revealedNumberedCells) {
+                    const neighbors1 = this.getAdjacentCells(cell1.r, cell1.c);
+                    const unrevealed1 = neighbors1.filter(n => !this.revealed[n.row][n.col] && !this.flagged[n.row][n.col]);
+                    const flagged1 = neighbors1.filter(n => this.flagged[n.row][n.col]);
+                    const remainingMines1 = this.grid[cell1.r][cell1.c] - flagged1.length;
+
+                    if (unrevealed1.length < 2) continue;
+
+                    const adjacentRevealed = neighbors1.filter(n => this.revealed[n.row][n.col] && this.grid[n.row][n.col] > 0);
+
+                    for (const cell2 of adjacentRevealed) {
+                        const neighbors2 = this.getAdjacentCells(cell2.row, cell2.col);
+                        const unrevealed2 = neighbors2.filter(n => !this.revealed[n.row][n.col] && !this.flagged[n.row][n.col]);
+                        const flagged2 = neighbors2.filter(n => this.flagged[n.row][n.col]);
+                        const remainingMines2 = this.grid[cell2.row][cell2.col] - flagged2.length;
+
+                        const set1 = unrevealed1.map(c => `${c.row},${c.col}`);
+                        const set2 = unrevealed2.map(c => `${c.row},${c.col}`);
+                        
+                        const diff1 = set1.filter(c => !set2.includes(c)).map(s => ({row: parseInt(s.split(',')[0]), col: parseInt(s.split(',')[1])})); // In set1, not set2
+                        const diff2 = set2.filter(c => !set1.includes(c)).map(s => ({row: parseInt(s.split(',')[0]), col: parseInt(s.split(',')[1])})); // In set2, not set1
+
+                        // If set2 is a subset of set1
+                        if (diff2.length === 0 && diff1.length > 0) {
+                            const mineDiff = remainingMines1 - remainingMines2;
+                            if (mineDiff === diff1.length) { // All unique cells in set1 are mines
+                                console.log(`[AI] Strategy 2: Found mine via subset logic at [${diff1[0].row + 1}, ${diff1[0].col + 1}]`);
+                                return { action: 'flag', row: diff1[0].row, col: diff1[0].col, reason: 'Subset Logic' };
+                            }
+                            if (mineDiff === 0) { // All unique cells in set1 are safe
+                                console.log(`[AI] Strategy 2: Found safe cell via subset logic at [${diff1[0].row + 1}, ${diff1[0].col + 1}]`);
+                                return { action: 'reveal', row: diff1[0].row, col: diff1[0].col, reason: 'Subset Logic' };
+                            }
+                        }
+                        // If set1 is a subset of set2
+                        if (diff1.length === 0 && diff2.length > 0) {
+                            const mineDiff = remainingMines2 - remainingMines1;
+                            if (mineDiff === diff2.length) { // All unique cells in set2 are mines
+                                console.log(`[AI] Strategy 2: Found mine via subset logic at [${diff2[0].row + 1}, ${diff2[0].col + 1}]`);
+                                return { action: 'flag', row: diff2[0].row, col: diff2[0].col, reason: 'Subset Logic' };
+                            }
+                            if (mineDiff === 0) { // All unique cells in set2 are safe
+                                console.log(`[AI] Strategy 2: Found safe cell via subset logic at [${diff2[0].row + 1}, ${diff2[0].col + 1}]`);
+                                return { action: 'reveal', row: diff2[0].row, col: diff2[0].col, reason: 'Subset Logic' };
+                            }
+                        }
                     }
                 }
-                
-                return null;
+                console.log('[AI] Strategy 2: No subset logic moves found.');
+
+                // Strategy 3: Fallback to probability on the frontier
+                const frontierCells = this.getFrontierCells().filter(cell => !this.flagged[cell.row][cell.col]);
+                if (frontierCells.length > 0) {
+                    const probabilities = this.calculateMineProbabilities();
+                    console.log('[AI] Strategy 3: Probabilities calculated for frontier:', probabilities);
+                    
+                    let safestCell = frontierCells[0];
+                    let minProb = probabilities[safestCell.row][safestCell.col];
+                    
+                    for(const cell of frontierCells) {
+                        if(probabilities[cell.row][cell.col] < minProb) {
+                            minProb = probabilities[cell.row][cell.col];
+                            safestCell = cell;
+                        }
+                    }
+                    
+                    console.log(`[AI] Strategy 3: Safest frontier cell is [${safestCell.row + 1}, ${safestCell.col + 1}] with probability ${minProb}`);
+                    return { action: 'reveal', row: safestCell.row, col: safestCell.col, reason: `Guess: ${(minProb*100).toFixed(0)}%` };
+                }
+
+                // Final fallback: if no frontier, guess from any remaining unrevealed cell (should be rare)
+                const unrevealedCells = this.findUnrevealedCells().filter(cell => !this.flagged[cell.row][cell.col]);
+                if (unrevealedCells.length > 0) {
+                    console.log('[AI] No frontier cells found. Falling back to random guess from all unrevealed cells.');
+                    const randomCell = unrevealedCells[Math.floor(Math.random() * unrevealedCells.length)];
+                    return { action: 'reveal', row: randomCell.row, col: randomCell.col, reason: 'Random Guess' };
+                }
+
+                console.log('[AI] No moves found by any strategy.');
+                return null; // Should only be reached if there are no unrevealed cells left
             }
             
             calculateMineProbabilities() {
@@ -539,6 +633,32 @@
                 }
                 return cells;
             }
+
+            findRevealedNumberedCells() {
+                const cells = [];
+                for (let r = 0; r < this.rows; r++) {
+                    for (let c = 0; c < this.cols; c++) {
+                        if (this.revealed[r][c] && this.grid[r][c] > 0) {
+                            cells.push({ r, c });
+                        }
+                    }
+                }
+                return cells;
+            }
+
+            getFrontierCells() {
+                const frontier = new Set();
+                const revealedNumberedCells = this.findRevealedNumberedCells();
+                for (const cell of revealedNumberedCells) {
+                    const neighbors = this.getAdjacentCells(cell.r, cell.c);
+                    for (const neighbor of neighbors) {
+                        if (!this.revealed[neighbor.row][neighbor.col]) {
+                            frontier.add(`${neighbor.row},${neighbor.col}`);
+                        }
+                    }
+                }
+                return Array.from(frontier).map(s => ({row: parseInt(s.split(',')[0]), col: parseInt(s.split(',')[1])}));
+            }
             
             startAutoPlay() {
                 const autoStep = () => {
@@ -562,6 +682,7 @@
                         this.wins = 0;
                     }
                 }
+                this.firstMove = true;
                 this.initGame();
                 this.renderGrid();
                 setTimeout(() => this.startAutoPlay(), CONFIG.AUTO_START_DELAY);
