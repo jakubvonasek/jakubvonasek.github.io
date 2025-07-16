@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Round Corners - Round App Icon Corners Online | Free Tool</title>
+    <meta name="description" content="Round the corners of your app icons online. Free tool to create rounded app icons with custom radius. Perfect for iOS, Android, and web apps.">
+    <meta name="keywords" content="round corners, app icon, rounded corners, icon maker, corner radius, app icon rounder, iOS icon, Android icon, favicon rounder">
+    <meta name="author" content="Round Corners">
+    <meta property="og:title" content="Round Corners - Round App Icon Corners Online">
+    <meta property="og:description" content="Round the corners of your app icons online. Free tool to create rounded app icons with custom radius.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://roundcorners.xyz">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Round Corners - Round App Icon Corners Online">
+    <meta name="twitter:description" content="Round the corners of your app icons online. Free tool to create rounded app icons with custom radius.">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-180x180.png">
+    <link rel="manifest" href="img/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'spin-slow': 'spin 2s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useCallback, useEffect } = React;
+
+        // Utility function to create download link
+        const downloadImage = (canvas, filename = 'app_icon.png') => {
+            try {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                return true;
+            } catch (error) {
+                console.error('Download failed:', error);
+                return false;
+            }
+        };
+
+        // ICO generation utility
+        const generateICO = (image, sizes = [16, 32, 48]) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // ICO header structure
+            const icoHeader = new ArrayBuffer(6 + sizes.length * 16);
+            const headerView = new DataView(icoHeader);
+            
+            // ICO file header
+            headerView.setUint16(0, 0, true); // Reserved
+            headerView.setUint16(2, 1, true);  // Type (1 = ICO)
+            headerView.setUint16(4, sizes.length, true); // Number of images
+            
+            let offset = 6 + sizes.length * 16;
+            const images = [];
+            
+            // Generate each size
+            for (let i = 0; i < sizes.length; i++) {
+                const size = sizes[i];
+                const processedCanvas = processImage(image, size, 0);
+                
+                // Convert to PNG
+                const pngData = processedCanvas.toDataURL('image/png');
+                const base64Data = pngData.split(',')[1];
+                const pngBytes = atob(base64Data);
+                const pngArray = new Uint8Array(pngBytes.length);
+                for (let j = 0; j < pngBytes.length; j++) {
+                    pngArray[j] = pngBytes.charCodeAt(j);
+                }
+                
+                // ICO directory entry
+                const entryOffset = 6 + i * 16;
+                headerView.setUint8(entryOffset, size); // Width
+                headerView.setUint8(entryOffset + 1, size); // Height
+                headerView.setUint8(entryOffset + 2, 0); // Color count
+                headerView.setUint8(entryOffset + 3, 0); // Reserved
+                headerView.setUint16(entryOffset + 4, 1, true); // Color planes
+                headerView.setUint16(entryOffset + 6, 32, true); // Bits per pixel
+                headerView.setUint32(entryOffset + 8, pngArray.length, true); // Size
+                headerView.setUint32(entryOffset + 12, offset, true); // Offset
+                
+                images.push(pngArray);
+                offset += pngArray.length;
+            }
+            
+            // Combine header and images
+            const icoData = new Uint8Array(icoHeader.byteLength + images.reduce((sum, img) => sum + img.length, 0));
+            icoData.set(new Uint8Array(icoHeader), 0);
+            
+            let currentOffset = icoHeader.byteLength;
+            for (const img of images) {
+                icoData.set(img, currentOffset);
+                currentOffset += img.length;
+            }
+            
+            return icoData;
+        };
+
+        // Favicon generation utility
+        const generateFavicon = async (image, sizes = [16, 32, 48, 64, 128, 180, 192, 512]) => {
+            const zip = new JSZip();
+            const canvases = [];
+            
+            // Generate different sizes
+            for (const size of sizes) {
+                const canvas = processImage(image, size, 0); // Square favicons
+                canvases.push({ canvas, size });
+                
+                // Add PNG to zip
+                const dataUrl = canvas.toDataURL('image/png');
+                const base64Data = dataUrl.split(',')[1];
+                zip.file(`favicon-${size}x${size}.png`, base64Data, { base64: true });
+            }
+            
+            // Generate ICO file (16x16 and 32x32)
+            const ico16 = processImage(image, 16, 0);
+            const ico32 = processImage(image, 32, 0);
+            const ico16Data = ico16.toDataURL('image/png').split(',')[1];
+            const ico32Data = ico32.toDataURL('image/png').split(',')[1];
+            zip.file('favicon-16x16.png', ico16Data, { base64: true });
+            zip.file('favicon-32x32.png', ico32Data, { base64: true });
+            
+            // Generate manifest.json for PWA
+            const manifest = {
+                "name": "Your App",
+                "short_name": "App",
+                "icons": [
+                    { "src": "favicon-192x192.png", "sizes": "192x192", "type": "image/png" },
+                    { "src": "favicon-512x512.png", "sizes": "512x512", "type": "image/png" }
+                ],
+                "theme_color": "#ffffff",
+                "background_color": "#ffffff",
+                "display": "standalone"
+            };
+            zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+            
+            // Generate HTML snippet
+            const htmlSnippet = `<!-- Favicon HTML snippet - Add to your <head> section -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180x180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffffff">`;
+            
+            zip.file('favicon-instructions.html', htmlSnippet);
+            
+            return zip;
+        };
+
+        // Image processing utility
+        const processImage = (image, size, cornerRadius) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Clear canvas with transparency
+            ctx.clearRect(0, 0, size, size);
+            
+            // Calculate crop dimensions (square crop from center)
+            const minDimension = Math.min(image.width, image.height);
+            const cropX = (image.width - minDimension) / 2;
+            const cropY = (image.height - minDimension) / 2;
+            
+            // Create clipping path for rounded corners
+            ctx.beginPath();
+            if (cornerRadius === 0) {
+                ctx.rect(0, 0, size, size);
+            } else {
+                const radius = Math.min(cornerRadius, size / 2);
+                ctx.roundRect(0, 0, size, size, radius);
+            }
+            ctx.clip();
+            
+            // Draw the cropped image
+            ctx.drawImage(
+                image,
+                cropX, cropY, minDimension, minDimension,
+                0, 0, size, size
+            );
+            
+            return canvas;
+        };
+
+        // Loading Spinner Component
+        const LoadingSpinner = () => (
+            <div className="flex items-center justify-center p-4">
+                <div className="animate-spin-slow rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Processing...</span>
+            </div>
+        );
+
+        // Image Uploader Component
+        const ImageUploader = ({ onImageUpload, error }) => {
+            const [isDragging, setIsDragging] = useState(false);
+            const fileInputRef = useRef(null);
+
+            const handleDragOver = useCallback((e) => {
+                e.preventDefault();
+                setIsDragging(true);
+            }, []);
+
+            const handleDragLeave = useCallback((e) => {
+                e.preventDefault();
+                setIsDragging(false);
+            }, []);
+
+            const handleDrop = useCallback((e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            }, []);
+
+            const handleFileInput = useCallback((e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFile(file);
+                }
+            }, []);
+
+            const handleFile = (file) => {
+                if (!file.type.startsWith('image/')) {
+                    onImageUpload(null, 'Please select a valid image file (PNG, JPEG, etc.)');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        onImageUpload(img, null);
+                    };
+                    img.onerror = () => {
+                        onImageUpload(null, 'Failed to load image. Please try another file.');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => {
+                    onImageUpload(null, 'Failed to read file. Please try again.');
+                };
+                reader.readAsDataURL(file);
+            };
+
+            return (
+                <div className="w-full">
+                    <div
+                        className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer ${
+                            isDragging
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <div className="space-y-4">
+                            <div className="text-4xl">📱</div>
+                            <div>
+                                <p className="text-lg font-medium text-gray-700">
+                                    Drop your image here or click to browse
+                                </p>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Supports PNG, JPEG, and other image formats
+                                </p>
+                            </div>
+                        </div>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileInput}
+                            className="hidden"
+                        />
+                    </div>
+                    {error && (
+                        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-red-700 text-sm">{error}</p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Size Presets Component
+        const SizePresets = ({ currentSize, onSizeChange }) => {
+            const presets = [
+                { size: 180, label: '180×180', description: 'iOS App Icon' },
+                { size: 512, label: '512×512', description: 'Android Icon' },
+                { size: 1024, label: '1024×1024', description: 'iOS Store' },
+            ];
+
+            return (
+                <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-gray-700">Icon Size</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {presets.map(({ size, label, description }) => (
+                            <button
+                                key={size}
+                                onClick={() => onSizeChange(size)}
+                                className={`p-3 rounded-lg border text-left transition-all duration-200 ${
+                                    currentSize === size
+                                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                <div className="font-medium text-sm">{label}</div>
+                                <div className="text-xs text-gray-500">{description}</div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // Radius Control Component
+        const RadiusControl = ({ size, cornerRadius, onRadiusChange }) => {
+            const maxRadius = size / 2;
+            
+            const presets = [
+                { radius: 0, label: 'Square' },
+                { radius: size * 0.1, label: 'Less Rounded' },
+                { radius: size * 0.2, label: 'Rounded' },
+                { radius: maxRadius, label: 'Circle' },
+            ];
+
+            return (
+                <div className="space-y-4">
+                    <h3 className="text-sm font-medium text-gray-700">Corner Radius</h3>
+                    
+                    {/* Slider */}
+                    <div className="space-y-2">
+                        <input
+                            type="range"
+                            min="0"
+                            max={maxRadius}
+                            value={cornerRadius}
+                            onChange={(e) => onRadiusChange(Number(e.target.value))}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <div className="text-xs text-gray-500 text-center">
+                            {cornerRadius}px
+                        </div>
+                    </div>
+
+                    {/* Preset buttons */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {presets.map(({ radius, label }) => (
+                            <button
+                                key={label}
+                                onClick={() => onRadiusChange(radius)}
+                                className={`px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 ${
+                                    Math.abs(cornerRadius - radius) < 1
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // Canvas Preview Component
+        const CanvasPreview = ({ image, size, cornerRadius }) => {
+            const canvasRef = useRef(null);
+            const [isProcessing, setIsProcessing] = useState(false);
+
+            useEffect(() => {
+                if (!image || !canvasRef.current) return;
+
+                setIsProcessing(true);
+                
+                // Use setTimeout to allow UI to update
+                setTimeout(() => {
+                    const canvas = canvasRef.current;
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = size;
+                    canvas.height = size;
+                    
+                    // Clear canvas
+                    ctx.clearRect(0, 0, size, size);
+                    
+                    // Calculate crop dimensions
+                    const minDimension = Math.min(image.width, image.height);
+                    const cropX = (image.width - minDimension) / 2;
+                    const cropY = (image.height - minDimension) / 2;
+                    
+                    // Create clipping path
+                    ctx.beginPath();
+                    if (cornerRadius === 0) {
+                        ctx.rect(0, 0, size, size);
+                    } else {
+                        const radius = Math.min(cornerRadius, size / 2);
+                        ctx.roundRect(0, 0, size, size, radius);
+                    }
+                    ctx.clip();
+                    
+                    // Draw image
+                    ctx.drawImage(
+                        image,
+                        cropX, cropY, minDimension, minDimension,
+                        0, 0, size, size
+                    );
+                    
+                    setIsProcessing(false);
+                }, 10);
+            }, [image, size, cornerRadius]);
+
+            if (!image) {
+                return (
+                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
+                        <div className="text-center text-gray-500">
+                            <div className="text-4xl mb-2">🖼️</div>
+                            <p>Upload an image to see preview</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="space-y-4">
+                    <h3 className="text-sm font-medium text-gray-700">Preview</h3>
+                    <div className="flex justify-center">
+                        <div className="relative">
+                            {isProcessing && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg z-10">
+                                    <LoadingSpinner />
+                                </div>
+                            )}
+                            <canvas
+                                ref={canvasRef}
+                                className="border border-gray-200 rounded-lg shadow-sm max-w-full h-auto"
+                                style={{ 
+                                    maxWidth: '300px',
+                                    maxHeight: '300px',
+                                    width: 'auto',
+                                    height: 'auto'
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Download Button Component
+        const DownloadButton = ({ image, size, cornerRadius, onError }) => {
+            const [isDownloading, setIsDownloading] = useState(false);
+
+            const handleDownload = async () => {
+                if (!image) return;
+
+                setIsDownloading(true);
+                
+                try {
+                    // Create processed canvas
+                    const canvas = processImage(image, size, cornerRadius);
+                    
+                    // Download the image
+                    const success = downloadImage(canvas, 'app_icon.png');
+                    
+                    if (!success) {
+                        onError('Download failed. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Download error:', error);
+                    onError('Download failed. Please try again.');
+                } finally {
+                    setIsDownloading(false);
+                }
+            };
+
+            return (
+                <button
+                    onClick={handleDownload}
+                    disabled={!image || isDownloading}
+                    className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                        !image || isDownloading
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg'
+                    }`}
+                >
+                    {isDownloading ? (
+                        <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Downloading...
+                        </div>
+                    ) : (
+                        '📥 Download PNG'
+                    )}
+                </button>
+            );
+        };
+
+        // ICO Download Component
+        const ICODownload = ({ image, onError }) => {
+            const [isGenerating, setIsGenerating] = useState(false);
+
+            const handleICODownload = async () => {
+                if (!image) return;
+
+                setIsGenerating(true);
+                
+                try {
+                    const icoData = generateICO(image);
+                    const blob = new Blob([icoData], { type: 'image/x-icon' });
+                    
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = 'favicon.ico';
+                    link.href = URL.createObjectURL(blob);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                    
+                } catch (error) {
+                    console.error('ICO generation error:', error);
+                    onError('ICO generation failed. Please try again.');
+                } finally {
+                    setIsGenerating(false);
+                }
+            };
+
+            return (
+                <button
+                    onClick={handleICODownload}
+                    disabled={!image || isGenerating}
+                    className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                        !image || isGenerating
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 shadow-md hover:shadow-lg'
+                    }`}
+                >
+                    {isGenerating ? (
+                        <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Generating ICO...
+                        </div>
+                    ) : (
+                        '📄 Download ICO'
+                    )}
+                </button>
+            );
+        };
+
+        // Favicon Download Component
+        const FaviconDownload = ({ image, onError }) => {
+            const [isGenerating, setIsGenerating] = useState(false);
+
+            const handleFaviconDownload = async () => {
+                if (!image) return;
+
+                setIsGenerating(true);
+                
+                try {
+                    const zip = await generateFavicon(image);
+                    const content = await zip.generateAsync({ type: 'blob' });
+                    
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = 'favicon-pack.zip';
+                    link.href = URL.createObjectURL(content);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                    
+                } catch (error) {
+                    console.error('Favicon generation error:', error);
+                    onError('Favicon generation failed. Please try again.');
+                } finally {
+                    setIsGenerating(false);
+                }
+            };
+
+            return (
+                <button
+                    onClick={handleFaviconDownload}
+                    disabled={!image || isGenerating}
+                    className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                        !image || isGenerating
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 shadow-md hover:shadow-lg'
+                    }`}
+                >
+                    {isGenerating ? (
+                        <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Generating Favicon Pack...
+                        </div>
+                    ) : (
+                        '🌐 Download Favicon Pack (ZIP)'
+                    )}
+                </button>
+            );
+        };
+
+        // Main App Component
+        const AppIconMaker = () => {
+            const [image, setImage] = useState(null);
+            const [size, setSize] = useState(512);
+            const [cornerRadius, setCornerRadius] = useState(102.4); // 10% of 512
+            const [error, setError] = useState('');
+
+            const handleImageUpload = (uploadedImage, uploadError) => {
+                setImage(uploadedImage);
+                setError(uploadError || '');
+            };
+
+            const handleSizeChange = (newSize) => {
+                const oldSize = size;
+                setSize(newSize);
+                // Maintain the same corner radius ratio
+                const ratio = cornerRadius / oldSize;
+                const newRadius = Math.min(newSize * ratio, newSize / 2);
+                setCornerRadius(newRadius);
+            };
+
+            const handleError = (errorMessage) => {
+                setError(errorMessage);
+                setTimeout(() => setError(''), 5000); // Clear error after 5 seconds
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-8 px-4">
+                    <div className="max-w-4xl mx-auto">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                                Round Corners
+                            </h1>
+                            <p className="text-lg text-gray-600">
+                                Round the corners of your app icons online
+                            </p>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                {/* Left Column - Controls */}
+                                <div className="space-y-6">
+                                    <ImageUploader 
+                                        onImageUpload={handleImageUpload}
+                                        error={error}
+                                    />
+                                    
+                                    {image && (
+                                        <>
+                                            <SizePresets 
+                                                currentSize={size}
+                                                onSizeChange={handleSizeChange}
+                                            />
+                                            
+                                            <RadiusControl
+                                                size={size}
+                                                cornerRadius={cornerRadius}
+                                                onRadiusChange={setCornerRadius}
+                                            />
+                                            
+                                            <div className="space-y-3">
+                                                <DownloadButton
+                                                    image={image}
+                                                    size={size}
+                                                    cornerRadius={cornerRadius}
+                                                    onError={handleError}
+                                                />
+                                                
+                                                <ICODownload
+                                                    image={image}
+                                                    onError={handleError}
+                                                />
+                                                
+                                                <FaviconDownload
+                                                    image={image}
+                                                    onError={handleError}
+                                                />
+                                                
+                                                <div className="text-xs text-gray-500 text-center">
+                                                    <p>App Icon: Single PNG with custom size & corners</p>
+                                                    <p>ICO: Standard favicon format (16x16, 32x32, 48x48)</p>
+                                                    <p>Favicon Pack: Complete set with HTML snippet & manifest</p>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Right Column - Preview */}
+                                <div>
+                                    <CanvasPreview
+                                        image={image}
+                                        size={size}
+                                        cornerRadius={cornerRadius}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="text-center mt-8 text-gray-500 text-sm">
+                            <p>Upload an image, adjust corner radius, then download your rounded app icon!</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app using React 18 createRoot API
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AppIconMaker />);
+    </script>
+
+    <style>
+        /* Custom slider styling */
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Ensure canvas renders with transparency */
+        canvas {
+            background: transparent;
+        }
+    </style>
+</body>
+</html>
