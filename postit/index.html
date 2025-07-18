@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostIt - Add Gradient Backgrounds to Screenshots</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>PostIt</h1>
+        <p>Add beautiful gradient backgrounds to your screenshots</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="imageInput" accept="image/*" hidden>
+            <div class="upload-content">
+                <div class="upload-icon">📸</div>
+                <p>Click to upload or drag & drop your screenshot</p>
+                <small>Supports PNG, JPG, JPEG</small>
+            </div>
+        </div>
+        
+        <div class="gradient-selector" id="gradientSelector" style="display: none;">
+            <h3>Choose a gradient:</h3>
+            <div class="gradient-options">
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"></div>
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"></div>
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"></div>
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"></div>
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"></div>
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"></div>
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)"></div>
+                <div class="gradient-option" data-gradient="linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)"></div>
+            </div>
+        </div>
+        
+        <div class="preview-area" id="previewArea" style="display: none;">
+            <h3>Preview:</h3>
+            <canvas id="canvas"></canvas>
+            <div class="controls">
+                <button id="downloadBtn">Download Image</button>
+                <button id="newImageBtn">Upload New Image</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
