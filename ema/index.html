@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Boyfriend Guide for Emi 💌</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #1a1a1a;
+    --accent: #ff6f91;
+    --accent2: #a78bfa;
+    --text: #f2f2f2;
+    --muted: #aaa;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at top, #1b1024 0%, #0a0a0a 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100%;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  header .heart {
+    font-size: 40px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  h1 {
+    font-size: 28px;
+    margin: 10px 0 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 15px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 26px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .card h2 {
+    font-size: 19px;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card p {
+    color: #ddd;
+    line-height: 1.6;
+    margin: 0 0 10px;
+  }
+  .reasons {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+  }
+  .reasons li {
+    padding: 10px 14px;
+    background: #222;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  /* Love graph */
+  .graph-wrap {
+    background: #111;
+    border-radius: 12px;
+    padding: 16px 16px 8px;
+    margin-top: 14px;
+  }
+  .graph-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .grid-line {
+    stroke: #2a2a2a;
+    stroke-width: 1;
+  }
+  .axis-line {
+    stroke: #444;
+    stroke-width: 1.5;
+  }
+  .axis-label {
+    fill: var(--muted);
+    font-size: 9px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .axis-title {
+    fill: #888;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .love-area {
+    fill: url(#loveFill);
+    opacity: 0;
+    animation: fadeIn 1s ease 1.6s forwards;
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+  .love-line {
+    fill: none;
+    stroke: url(#loveGradient);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 900;
+    stroke-dashoffset: 900;
+    animation: draw 2.2s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  @keyframes draw {
+    to { stroke-dashoffset: 0; }
+  }
+  .love-point {
+    fill: #0a0a0a;
+    stroke: var(--accent);
+    stroke-width: 2;
+    opacity: 0;
+    animation: popIn 0.4s ease forwards;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .love-point.last {
+    stroke: var(--accent2);
+    fill: var(--accent2);
+  }
+  .love-label {
+    text-align: center;
+    margin-top: 4px;
+    padding-bottom: 8px;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    margin-top: 6px;
+  }
+  .btn:active { transform: scale(0.98); }
+
+  /* Countdown / status */
+  .status-box {
+    text-align: center;
+  }
+  .status-box .big {
+    font-size: 42px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 6px 0;
+  }
+  .status-box .sub {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .here-badge {
+    display: inline-block;
+    background: #1f4d2e;
+    color: #7fe3a1;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  footer {
+    text-align: center;
+    color: #555;
+    font-size: 12px;
+    margin-top: 40px;
+  }
+
+  /* Messages */
+  .messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .message {
+    background: #222;
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 14px;
+    opacity: 0;
+    animation: msgIn 0.5s ease forwards;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .message .msg-date {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .message .msg-text {
+    color: #eee;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .messages-empty, .messages-error {
+    color: var(--muted);
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="heart">💌</div>
+      <h1>Easy Boyfriend Guide</h1>
+      <p>for Emi &mdash; answers to common questions, from Jakub with love</p>
+    </header>
+
+    <section class="card">
+      <h2>1) My boyfriend is not responding right now 😢</h2>
+      <p>Don't panic. He is definitely one of these:</p>
+      <ul class="reasons">
+        <li>😴 He fell asleep</li>
+        <li>⚡ Had a sudden energy burst and is off doing something</li>
+        <li>💭 Misses you too, and is probably just thinking about you</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>2) Does he really love me?</h2>
+      <p>YES. He really, really does. Watch the line only go up:</p>
+      <div class="graph-wrap">
+        <svg viewBox="0 0 340 190" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="loveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ff6f91" />
+              <stop offset="100%" stop-color="#a78bfa" />
+            </linearGradient>
+            <linearGradient id="loveFill" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#a78bfa" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+
+          <!-- horizontal gridlines + y labels -->
+          <g id="yGrid"></g>
+          <!-- x axis labels -->
+          <g id="xLabels"></g>
+
+          <!-- axes -->
+          <line class="axis-line" x1="40" y1="10" x2="40" y2="140" />
+          <line class="axis-line" x1="40" y1="140" x2="320" y2="140" />
+
+          <text class="axis-title" x="180" y="180" text-anchor="middle">Time together</text>
+          <text class="axis-title" x="0" y="0" text-anchor="middle" transform="translate(14,75) rotate(-90)">Love level</text>
+
+          <path class="love-area" id="loveArea" d="" />
+          <polyline class="love-line" id="loveLine" points="" />
+          <g id="lovePoints"></g>
+        </svg>
+        <div class="love-label" id="loveLabel">Love level: climbing 📈</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3) When will I SEE him again?</h2>
+      <div class="status-box" id="statusBox">
+        <!-- filled by JS -->
+      </div>
+      <button class="btn" onclick="alert('☎️ Ringing Jakub... he already picked up because it\'s you 💕')">📞 Book a video call with Jakub</button>
+    </section>
+
+    <section class="card">
+      <h2>4) Notes from Jakub 💌</h2>
+      <div class="messages" id="messages">
+        <div class="messages-empty">Loading...</div>
+      </div>
+    </section>
+
+    <footer>tvůj Jakub 🩵</footer>
+  </div>
+
+  <script>
+    function daysBetween(a, b) {
+      const MS = 24 * 60 * 60 * 1000;
+      const d1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+      const d2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+      return Math.round((d2 - d1) / MS);
+    }
+
+    function renderStatus() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const arrivalDate = new Date(year, 9, 7);   // Oct 7
+      const departureDate = new Date(year, 9, 23); // Oct 23
+      const returnDate = new Date(year, 11, 23);   // Dec 23
+
+      const box = document.getElementById('statusBox');
+
+      if (now < arrivalDate) {
+        const days = daysBetween(now, arrivalDate);
+        box.innerHTML = `
+          <div class="sub">Countdown until Jakub lands in Canada</div>
+          <div class="big">${days} day${days === 1 ? '' : 's'}</div>
+          <div class="sub">until October 7 🛬</div>
+        `;
+      } else if (now >= arrivalDate && now <= departureDate) {
+        box.innerHTML = `
+          <div class="here-badge">✈️ He's here with you right now!</div>
+          <div class="sub" style="margin-top:10px;">Until October 23</div>
+        `;
+      } else if (now > departureDate && now < returnDate) {
+        const days = daysBetween(now, returnDate);
+        box.innerHTML = `
+          <div class="sub">Countdown until Jakub is back for good</div>
+          <div class="big">${days} day${days === 1 ? '' : 's'}</div>
+          <div class="sub">until December 23 🎄</div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div class="here-badge">🎉 He's back and staying!</div>
+        `;
+      }
+    }
+
+    renderStatus();
+
+    function renderLoveGraph() {
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const xMin = 40, xMax = 320, yTop = 10, yBottom = 140;
+
+      // Months as x-axis categories, love level (0-100) trending up with a little noise
+      const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const values = [40, 55, 68, 82, 97];
+
+      const xStep = (xMax - xMin) / (months.length - 1);
+      const yScale = v => yBottom - (v / 100) * (yBottom - yTop);
+      const points = values.map((v, i) => ({ x: xMin + i * xStep, y: yScale(v), v }));
+
+      // gridlines + y-axis labels (0,25,50,75,100)
+      const yGrid = document.getElementById('yGrid');
+      [0, 25, 50, 75, 100].forEach(v => {
+        const y = yScale(v);
+        const line = document.createElementNS(svgNS, 'line');
+        line.setAttribute('class', 'grid-line');
+        line.setAttribute('x1', xMin);
+        line.setAttribute('x2', xMax);
+        line.setAttribute('y1', y);
+        line.setAttribute('y2', y);
+        yGrid.appendChild(line);
+
+        const label = document.createElementNS(svgNS, 'text');
+        label.setAttribute('class', 'axis-label');
+        label.setAttribute('x', xMin - 8);
+        label.setAttribute('y', y + 3);
+        label.setAttribute('text-anchor', 'end');
+        label.textContent = v;
+        yGrid.appendChild(label);
+      });
+
+      // x-axis labels
+      const xLabels = document.getElementById('xLabels');
+      points.forEach((p, i) => {
+        const label = document.createElementNS(svgNS, 'text');
+        label.setAttribute('class', 'axis-label');
+        label.setAttribute('x', p.x);
+        label.setAttribute('y', yBottom + 14);
+        label.setAttribute('text-anchor', 'middle');
+        label.textContent = months[i];
+        xLabels.appendChild(label);
+      });
+
+      // smooth-ish path using simple line segments (kept crisp, no external libs)
+      const linePoints = points.map(p => `${p.x},${p.y}`).join(' ');
+      document.getElementById('loveLine').setAttribute('points', linePoints);
+
+      const areaPath = `M ${points[0].x},${yBottom} ` +
+        points.map(p => `L ${p.x},${p.y}`).join(' ') +
+        ` L ${points[points.length - 1].x},${yBottom} Z`;
+      document.getElementById('loveArea').setAttribute('d', areaPath);
+
+      // animated data points
+      const pointsGroup = document.getElementById('lovePoints');
+      points.forEach((p, i) => {
+        const circle = document.createElementNS(svgNS, 'circle');
+        circle.setAttribute('class', 'love-point' + (i === points.length - 1 ? ' last' : ''));
+        circle.setAttribute('cx', p.x);
+        circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', i === points.length - 1 ? 5 : 3.5);
+        circle.style.animationDelay = `${1.8 + i * 0.1}s`;
+        const title = document.createElementNS(svgNS, 'title');
+        title.textContent = `${months[i]}: ${p.v}%`;
+        circle.appendChild(title);
+        pointsGroup.appendChild(circle);
+      });
+    }
+
+    renderLoveGraph();
+
+    function formatDate(iso) {
+      const d = new Date(iso + 'T00:00:00');
+      if (isNaN(d)) return iso;
+      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    async function renderMessages() {
+      const container = document.getElementById('messages');
+      try {
+        const res = await fetch('messages.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('failed to load');
+        const messages = await res.json();
+
+        if (!Array.isArray(messages) || messages.length === 0) {
+          container.innerHTML = '<div class="messages-empty">No notes yet — check back soon 💌</div>';
+          return;
+        }
+
+        const sorted = [...messages].sort((a, b) => new Date(b.date) - new Date(a.date));
+        container.innerHTML = '';
+        sorted.forEach((msg, i) => {
+          const el = document.createElement('div');
+          el.className = 'message';
+          el.style.animationDelay = `${i * 0.08}s`;
+          const dateEl = document.createElement('div');
+          dateEl.className = 'msg-date';
+          dateEl.textContent = formatDate(msg.date);
+          const textEl = document.createElement('div');
+          textEl.className = 'msg-text';
+          textEl.textContent = msg.text;
+          el.appendChild(dateEl);
+          el.appendChild(textEl);
+          container.appendChild(el);
+        });
+      } catch (err) {
+        container.innerHTML = '<div class="messages-error">Couldn\'t load notes right now 🥺</div>';
+      }
+    }
+
+    renderMessages();
+  </script>
+</body>
+</html>
