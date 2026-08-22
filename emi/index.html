@@ -503,7 +503,8 @@
       const svgNS = 'http://www.w3.org/2000/svg';
       const xMin = 40, xMax = 320, yTop = 10, yBottom = 140;
 
-      // Months as x-axis categories, love level (0-100) trending up with a little noise
+      // Months as x-axis categories. Love is unbounded: axis runs from -∞ to +∞,
+      // curve is an asymptotic climb that never touches either end.
       const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const values = [40, 55, 68, 82, 97];
 
@@ -511,9 +512,15 @@
       const yScale = v => yBottom - (v / 100) * (yBottom - yTop);
       const points = values.map((v, i) => ({ x: xMin + i * xStep, y: yScale(v), v }));
 
-      // gridlines + y-axis labels (0,25,50,75,100)
+      // gridlines + y-axis labels (-∞ ... +∞, no zero, no ceiling)
       const yGrid = document.getElementById('yGrid');
-      [0, 25, 50, 75, 100].forEach(v => {
+      [
+        { v: 0, label: '−∞' },
+        { v: 25, label: '' },
+        { v: 50, label: '' },
+        { v: 75, label: '' },
+        { v: 100, label: '+∞' },
+      ].forEach(({ v, label }) => {
         const y = yScale(v);
         const line = document.createElementNS(svgNS, 'line');
         line.setAttribute('class', 'grid-line');
@@ -523,13 +530,14 @@
         line.setAttribute('y2', y);
         yGrid.appendChild(line);
 
-        const label = document.createElementNS(svgNS, 'text');
-        label.setAttribute('class', 'axis-label');
-        label.setAttribute('x', xMin - 8);
-        label.setAttribute('y', y + 3);
-        label.setAttribute('text-anchor', 'end');
-        label.textContent = v;
-        yGrid.appendChild(label);
+        if (!label) return;
+        const labelEl = document.createElementNS(svgNS, 'text');
+        labelEl.setAttribute('class', 'axis-label');
+        labelEl.setAttribute('x', xMin - 8);
+        labelEl.setAttribute('y', y + 3);
+        labelEl.setAttribute('text-anchor', 'end');
+        labelEl.textContent = label;
+        yGrid.appendChild(labelEl);
       });
 
       // x-axis labels
@@ -563,7 +571,7 @@
         circle.setAttribute('r', i === points.length - 1 ? 5 : 3.5);
         circle.style.animationDelay = `${1.8 + i * 0.1}s`;
         const title = document.createElementNS(svgNS, 'title');
-        title.textContent = `${months[i]}: ${p.v}%`;
+        title.textContent = `${months[i]}: immeasurable 💗`;
         circle.appendChild(title);
         pointsGroup.appendChild(circle);
       });
