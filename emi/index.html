@@ -7,18 +7,18 @@
 <meta name="robots" content="noindex, nofollow" />
 <style>
   :root {
-    --bg: #0a0a0a;
-    --card: #1a1a1a;
-    --accent: #ff6f91;
-    --accent2: #a78bfa;
-    --text: #f2f2f2;
-    --muted: #aaa;
+    --bg: #2a0a1a;
+    --card: #3a1428;
+    --accent: #ff4f9a;
+    --accent2: #ff9ecb;
+    --text: #fff0f6;
+    --muted: #e0a8c4;
   }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
     padding: 0;
-    background: radial-gradient(circle at top, #1b1024 0%, #0a0a0a 60%);
+    background: radial-gradient(circle at top, #4a1330 0%, #2a0a1a 60%);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100%;
@@ -55,7 +55,7 @@
   }
   .card {
     background: var(--card);
-    border: 1px solid #2a2a2a;
+    border: 1px solid #5a2440;
     border-radius: 16px;
     padding: 26px 24px;
     margin-bottom: 24px;
@@ -80,7 +80,7 @@
   }
   .reasons li {
     padding: 10px 14px;
-    background: #222;
+    background: #4a1c34;
     border-radius: 10px;
     margin-bottom: 8px;
     font-size: 15px;
@@ -88,18 +88,18 @@
 
   /* Love graph */
   .graph-wrap {
-    background: #111;
+    background: #240816;
     border-radius: 12px;
     padding: 16px 16px 8px;
     margin-top: 14px;
   }
   .graph-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
   .grid-line {
-    stroke: #2a2a2a;
+    stroke: #4a1c34;
     stroke-width: 1;
   }
   .axis-line {
-    stroke: #444;
+    stroke: #7a3554;
     stroke-width: 1.5;
   }
   .axis-label {
@@ -137,7 +137,7 @@
     to { stroke-dashoffset: 0; }
   }
   .love-point {
-    fill: #0a0a0a;
+    fill: #2a0a1a;
     stroke: var(--accent);
     stroke-width: 2;
     opacity: 0;
@@ -197,8 +197,8 @@
   }
   .here-badge {
     display: inline-block;
-    background: #1f4d2e;
-    color: #7fe3a1;
+    background: #6b1f45;
+    color: #ffc2e0;
     padding: 6px 14px;
     border-radius: 999px;
     font-weight: 600;
@@ -208,7 +208,7 @@
 
   footer {
     text-align: center;
-    color: #555;
+    color: #a85f82;
     font-size: 12px;
     margin-top: 40px;
   }
@@ -221,7 +221,7 @@
     margin-top: 4px;
   }
   .message {
-    background: #222;
+    background: #4a1c34;
     border-left: 3px solid var(--accent);
     border-radius: 8px;
     padding: 12px 14px;
@@ -238,7 +238,7 @@
     margin-bottom: 4px;
   }
   .message .msg-text {
-    color: #eee;
+    color: #ffe4f0;
     font-size: 15px;
     line-height: 1.5;
   }
@@ -246,9 +246,101 @@
     color: var(--muted);
     font-size: 14px;
   }
+
+  /* Canada welcome overlay */
+  .welcome-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, #6b1f45 0%, #2a0a1a 70%);
+    overflow: hidden;
+    animation: overlayFade 0.6s ease;
+  }
+  @keyframes overlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .welcome-overlay.closing {
+    animation: overlayOut 0.5s ease forwards;
+  }
+  @keyframes overlayOut {
+    to { opacity: 0; visibility: hidden; }
+  }
+  .welcome-box {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    padding: 36px 30px;
+    max-width: 420px;
+  }
+  .welcome-box .maple-emoji {
+    font-size: 48px;
+  }
+  .welcome-box h2 {
+    font-size: 30px;
+    margin: 12px 0 8px;
+    color: #fff0f6;
+    text-shadow: 0 2px 12px rgba(255,79,154,0.6);
+  }
+  .welcome-box p {
+    color: #ffd6e8;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 20px;
+  }
+  .welcome-box button {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #2a0a1a;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .leaf {
+    position: absolute;
+    top: -40px;
+    font-size: 22px;
+    z-index: 1;
+    animation-name: leafFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes leafFall {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0.9; }
+    100% { transform: translateY(110vh) translateX(40px) rotate(360deg); opacity: 0.9; }
+  }
+  .kitten {
+    position: absolute;
+    bottom: -10px;
+    font-size: 30px;
+    z-index: 2;
+    animation-name: kittenBounce;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes kittenBounce {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    50% { transform: translateY(-14px) scaleX(1); }
+  }
 </style>
 </head>
 <body>
+  <div class="welcome-overlay" id="welcomeOverlay" style="display:none;">
+    <div id="leavesLayer"></div>
+    <div id="kittensLayer"></div>
+    <div class="welcome-box">
+      <div class="maple-emoji">🍁</div>
+      <h2>Welcome to Canada, Emi! 🇨🇦</h2>
+      <p>He's here, he's yours, and the whole country is throwing maple leaves and kittens in your honor. 💕</p>
+      <button onclick="closeWelcomeOverlay()">Let's go find him 🐾</button>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <div class="heart">💌</div>
@@ -364,6 +456,48 @@
     }
 
     renderStatus();
+
+    function closeWelcomeOverlay() {
+      const overlay = document.getElementById('welcomeOverlay');
+      overlay.classList.add('closing');
+      setTimeout(() => { overlay.style.display = 'none'; }, 500);
+      sessionStorage.setItem('emiWelcomeSeen', '1');
+    }
+
+    function renderWelcomeOverlay() {
+      if (sessionStorage.getItem('emiWelcomeSeen')) return;
+
+      const overlay = document.getElementById('welcomeOverlay');
+      overlay.style.display = 'flex';
+
+      const leaves = ['🍁', '🍂'];
+      const leavesLayer = document.getElementById('leavesLayer');
+      for (let i = 0; i < 22; i++) {
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        leaf.textContent = leaves[Math.floor(Math.random() * leaves.length)];
+        leaf.style.left = `${Math.random() * 100}%`;
+        leaf.style.fontSize = `${16 + Math.random() * 16}px`;
+        leaf.style.animationDuration = `${6 + Math.random() * 6}s`;
+        leaf.style.animationDelay = `${Math.random() * 8}s`;
+        leavesLayer.appendChild(leaf);
+      }
+
+      const kittens = ['🐱', '🐈', '🐈‍⬛'];
+      const kittensLayer = document.getElementById('kittensLayer');
+      for (let i = 0; i < 6; i++) {
+        const kitten = document.createElement('div');
+        kitten.className = 'kitten';
+        kitten.textContent = kittens[Math.floor(Math.random() * kittens.length)];
+        kitten.style.left = `${5 + Math.random() * 90}%`;
+        kitten.style.fontSize = `${24 + Math.random() * 14}px`;
+        kitten.style.animationDuration = `${1.4 + Math.random() * 1.2}s`;
+        kitten.style.animationDelay = `${Math.random() * 1.5}s`;
+        kittensLayer.appendChild(kitten);
+      }
+    }
+
+    renderWelcomeOverlay();
 
     function renderLoveGraph() {
       const svgNS = 'http://www.w3.org/2000/svg';
