@@ -31,6 +31,7 @@
   header {
     text-align: center;
     margin-bottom: 40px;
+    position: relative;
   }
   header .heart {
     font-size: 40px;
@@ -220,18 +221,24 @@
   .hidden-kitten {
     position: absolute;
     font-size: 18px;
-    opacity: 0.06;
+    opacity: 0.14;
     cursor: pointer;
     filter: grayscale(1);
     transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
     user-select: none;
-    z-index: 1;
+    z-index: 5;
     line-height: 1;
+    animation: kittenPeek 3.6s ease-in-out infinite;
+  }
+  @keyframes kittenPeek {
+    0%, 100% { transform: rotate(var(--r, 0deg)) scale(1); }
+    50% { transform: rotate(var(--r, 0deg)) scale(1.12); }
   }
   .hidden-kitten:hover {
-    opacity: 0.5;
+    opacity: 0.6;
     filter: grayscale(0.4);
-    transform: scale(1.15);
+    transform: rotate(var(--r, 0deg)) scale(1.3);
+    animation-play-state: paused;
   }
   .hidden-kitten.found {
     opacity: 1 !important;
@@ -697,7 +704,6 @@
 
     function renderHiddenKittens() {
       const kittenEmojis = ['🐱', '🐈', '🐈‍⬛', '🐾'];
-      const cards = document.querySelectorAll('.card');
       const tracker = document.getElementById('kittenTracker');
       const toast = document.getElementById('kittenToast');
       let total = 0;
@@ -719,33 +725,68 @@
         }
       }
 
-      cards.forEach((card, cardIndex) => {
-        const perCard = 2 + Math.floor(Math.random() * 2); // 2-3 per card
-        for (let i = 0; i < perCard; i++) {
-          total++;
-          const kitten = document.createElement('span');
-          kitten.className = 'hidden-kitten';
-          kitten.textContent = kittenEmojis[Math.floor(Math.random() * kittenEmojis.length)];
-          kitten.style.top = `${6 + Math.random() * 82}%`;
-          kitten.style.left = `${4 + Math.random() * 88}%`;
-          kitten.style.transform = `rotate(${-20 + Math.random() * 40}deg)`;
-          kitten.setAttribute('aria-label', 'hidden kitten');
-          kitten.addEventListener('click', () => {
-            if (kitten.classList.contains('found')) return;
-            kitten.classList.add('found');
-            found++;
-            const lines = [
-              'Found a hidden kitten! 🐱',
-              'Sneaky kitten discovered! 🐈',
-              'This one was well hidden 🐈‍⬛',
-              'Kitten collector achievement +1 🐾',
-            ];
-            showToast(lines[Math.floor(Math.random() * lines.length)]);
-            updateTracker();
-          });
-          card.appendChild(kitten);
+      // Safe corner/edge spots per card, where real content never renders —
+      // so every kitten is guaranteed clickable, never buried under a button or graph.
+      const cornerSpots = [
+        { top: '4%', left: '3%' },
+        { top: '4%', left: 'calc(100% - 26px)' },
+        { top: 'calc(100% - 26px)', left: '3%' },
+        { top: 'calc(100% - 26px)', left: 'calc(100% - 26px)' },
+      ];
+
+      function placeKitten(container, spot, size) {
+        total++;
+        const kitten = document.createElement('span');
+        kitten.className = 'hidden-kitten';
+        kitten.textContent = kittenEmojis[Math.floor(Math.random() * kittenEmojis.length)];
+        kitten.style.top = spot.top;
+        kitten.style.left = spot.left;
+        kitten.style.fontSize = `${size || 16}px`;
+        const rot = -18 + Math.random() * 36;
+        kitten.style.setProperty('--r', `${rot}deg`);
+        kitten.style.animationDelay = `${Math.random() * 2}s`;
+        kitten.setAttribute('aria-label', 'hidden kitten');
+        kitten.addEventListener('click', () => {
+          if (kitten.classList.contains('found')) return;
+          kitten.classList.add('found');
+          found++;
+          const lines = [
+            'Found a hidden kitten! 🐱',
+            'Sneaky kitten discovered! 🐈',
+            'This one was well hidden 🐈‍⬛',
+            'Kitten collector achievement +1 🐾',
+            'Purrfect find! 🐾',
+          ];
+          showToast(lines[Math.floor(Math.random() * lines.length)]);
+          updateTracker();
+        });
+        container.appendChild(kitten);
+      }
+
+      // Every card gets 1-2 kittens, tucked into its corners only.
+      document.querySelectorAll('.card').forEach((card) => {
+        const shuffled = [...cornerSpots].sort(() => Math.random() - 0.5);
+        const count = 1 + Math.floor(Math.random() * 2); // 1-2 per card
+        for (let i = 0; i < count; i++) {
+          placeKitten(card, shuffled[i]);
         }
       });
+
+      // A few extra creative hiding spots outside the cards.
+      const header = document.querySelector('header');
+      if (header) placeKitten(header, { top: '0%', left: 'calc(100% - 24px)' }, 15);
+
+      const footer = document.querySelector('footer');
+      if (footer) {
+        footer.style.position = 'relative';
+        placeKitten(footer, { top: '-18px', left: '50%' }, 15);
+      }
+
+      // One inside the tracker badge itself, once it appears — a reward for close readers.
+      setTimeout(() => {
+        tracker.style.position = 'fixed';
+        placeKitten(tracker, { top: '-20px', left: '-6px' }, 15);
+      }, 900);
 
       updateTracker();
       setTimeout(() => tracker.classList.add('show'), 800);
