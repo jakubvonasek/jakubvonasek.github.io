@@ -406,6 +406,32 @@
     0%, 100% { transform: translateY(0) scaleX(1); }
     50% { transform: translateY(-14px) scaleX(1); }
   }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 32px 14px 90px; }
+    h1 { font-size: 24px; }
+    .card { padding: 20px 16px; }
+    .status-box .big { font-size: 34px; }
+    .welcome-box h2 { font-size: 24px; }
+    .welcome-box p { font-size: 15px; }
+    /* Bigger tap targets for hidden kittens on touch screens */
+    .hidden-kitten {
+      font-size: 22px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .kitten-tracker {
+      left: 14px;
+      right: 14px;
+      bottom: 10px;
+      text-align: center;
+      font-size: 12px;
+    }
+    .kitten-toast { left: 14px; right: 14px; bottom: 54px; text-align: center; }
+  }
 </style>
 </head>
 <body>
