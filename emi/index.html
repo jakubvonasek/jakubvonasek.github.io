@@ -213,6 +213,78 @@
     margin-top: 40px;
   }
 
+  /* Hidden surprise kittens scattered around the page */
+  .card {
+    position: relative;
+  }
+  .hidden-kitten {
+    position: absolute;
+    font-size: 18px;
+    opacity: 0.06;
+    cursor: pointer;
+    filter: grayscale(1);
+    transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+    user-select: none;
+    z-index: 1;
+    line-height: 1;
+  }
+  .hidden-kitten:hover {
+    opacity: 0.5;
+    filter: grayscale(0.4);
+    transform: scale(1.15);
+  }
+  .hidden-kitten.found {
+    opacity: 1 !important;
+    filter: grayscale(0) !important;
+    animation: kittenFound 0.5s ease;
+    cursor: default;
+    pointer-events: none;
+  }
+  @keyframes kittenFound {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.6) rotate(-10deg); }
+    70% { transform: scale(0.9) rotate(6deg); }
+    100% { transform: scale(1.2) rotate(0deg); }
+  }
+  .kitten-tracker {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    background: #4a1c34;
+    border: 1px solid #7a3554;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--accent2);
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .kitten-tracker.show { opacity: 1; transform: translateY(0); }
+  .kitten-tracker.complete {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #2a0a1a;
+  }
+  .kitten-toast {
+    position: fixed;
+    bottom: 60px;
+    right: 14px;
+    background: #6b1f45;
+    color: #ffd6e8;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .kitten-toast.show { opacity: 1; transform: translateY(0); }
+
   /* Messages */
   .messages {
     display: flex;
@@ -412,6 +484,9 @@
     <footer>tvůj Jakub 🩵</footer>
   </div>
 
+  <div class="kitten-tracker" id="kittenTracker">🐾 0 / 0 hidden kittens found</div>
+  <div class="kitten-toast" id="kittenToast">Found a hidden kitten! 🐱</div>
+
   <script>
     function daysBetween(a, b) {
       const MS = 24 * 60 * 60 * 1000;
@@ -483,9 +558,9 @@
         leavesLayer.appendChild(leaf);
       }
 
-      const kittens = ['🐱', '🐈', '🐈‍⬛'];
+      const kittens = ['🐱', '🐈', '🐈‍⬛', '🐈'];
       const kittensLayer = document.getElementById('kittensLayer');
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 20; i++) {
         const kitten = document.createElement('div');
         kitten.className = 'kitten';
         kitten.textContent = kittens[Math.floor(Math.random() * kittens.length)];
@@ -619,6 +694,64 @@
     }
 
     renderMessages();
+
+    function renderHiddenKittens() {
+      const kittenEmojis = ['🐱', '🐈', '🐈‍⬛', '🐾'];
+      const cards = document.querySelectorAll('.card');
+      const tracker = document.getElementById('kittenTracker');
+      const toast = document.getElementById('kittenToast');
+      let total = 0;
+      let found = 0;
+      let toastTimer = null;
+
+      function showToast(text) {
+        toast.textContent = text;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      function updateTracker() {
+        tracker.textContent = `🐾 ${found} / ${total} hidden kittens found`;
+        if (found >= total) {
+          tracker.classList.add('complete');
+          tracker.textContent = `🎉 All ${total} kittens found! You have a gift for finding cats.`;
+        }
+      }
+
+      cards.forEach((card, cardIndex) => {
+        const perCard = 2 + Math.floor(Math.random() * 2); // 2-3 per card
+        for (let i = 0; i < perCard; i++) {
+          total++;
+          const kitten = document.createElement('span');
+          kitten.className = 'hidden-kitten';
+          kitten.textContent = kittenEmojis[Math.floor(Math.random() * kittenEmojis.length)];
+          kitten.style.top = `${6 + Math.random() * 82}%`;
+          kitten.style.left = `${4 + Math.random() * 88}%`;
+          kitten.style.transform = `rotate(${-20 + Math.random() * 40}deg)`;
+          kitten.setAttribute('aria-label', 'hidden kitten');
+          kitten.addEventListener('click', () => {
+            if (kitten.classList.contains('found')) return;
+            kitten.classList.add('found');
+            found++;
+            const lines = [
+              'Found a hidden kitten! 🐱',
+              'Sneaky kitten discovered! 🐈',
+              'This one was well hidden 🐈‍⬛',
+              'Kitten collector achievement +1 🐾',
+            ];
+            showToast(lines[Math.floor(Math.random() * lines.length)]);
+            updateTracker();
+          });
+          card.appendChild(kitten);
+        }
+      });
+
+      updateTracker();
+      setTimeout(() => tracker.classList.add('show'), 800);
+    }
+
+    renderHiddenKittens();
   </script>
 </body>
 </html>
