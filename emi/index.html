@@ -323,15 +323,25 @@
     70% { transform: scale(0.9) rotate(6deg); }
     100% { transform: scale(1.2) rotate(0deg); }
   }
+  /* Anchored bottom-right and sized once. The badge is pinned by its bottom
+     edge, so letting the text resize it made it hop on every find — a fixed
+     height, a single non-wrapping line and a reserved width hold it still. */
   .kitten-tracker {
     position: fixed;
     bottom: 14px;
     right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    min-width: 214px;
     background: #4a1c34;
     border: 1px solid #7a3554;
     border-radius: 999px;
-    padding: 8px 14px;
+    padding: 0 14px;
     font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
     color: var(--accent2);
     font-weight: 600;
     box-shadow: 0 4px 16px rgba(0,0,0,0.35);
@@ -560,6 +570,7 @@
       left: 14px;
       right: 14px;
       bottom: 10px;
+      min-width: 0;
       text-align: center;
       font-size: 12px;
     }
@@ -584,7 +595,7 @@
     <header>
       <div class="hero" id="hero">
         <canvas id="heartCanvas"></canvas>
-        <div class="hero-hint">drag the heart · it's yours</div>
+        <div class="hero-hint">Ťuťuťu</div>
       </div>
       <div class="hero-overlay">
         <h1>Boyfriend Guide</h1>
@@ -664,14 +675,11 @@
     // working. Drag the heart to spin it into a cat!
     const SECRET_CAT_ENABLED = true;
 
-    // The 3D particle hero is still being designed, so it runs on localhost
-    // only. Append ?3d=1 to preview it anywhere, ?3d=0 to hide it locally.
-    const HERO_3D_ENABLED = (() => {
-      const q = new URLSearchParams(location.search).get('3d');
-      if (q === '1') return true;
-      if (q === '0') return false;
-      return ['localhost', '127.0.0.1', '::1', ''].includes(location.hostname);
-    })();
+    // The 3D particle hero ships everywhere now, phones included — the particle
+    // budget already halves on narrow screens. Append ?3d=0 to fall back to the
+    // static heart.
+    const HERO_3D_ENABLED =
+      new URLSearchParams(location.search).get('3d') !== '0';
 
     function daysBetween(a, b) {
       const MS = 24 * 60 * 60 * 1000;
@@ -987,15 +995,18 @@
       let round = 0;
       let stars = 0;
       let rewarding = false;
+      let secretClaimed = false;
 
       // Rounds cycle, so the game keeps going: kittens, leaves, kittens...
       function currentRound() { return ROUNDS[round % ROUNDS.length]; }
 
+      // Both states are kept to a similar, short length: the badge is a fixed
+      // one-line pill, and the longer congratulation now rides in the toast.
       function updateTracker() {
         const noun = currentRound().noun;
         if (total > 0 && found >= total) {
           tracker.classList.add('complete');
-          trackerLabel.textContent = `🎉 All ${total} ${noun} found! You have a gift for finding them.`;
+          trackerLabel.textContent = `🎉 All ${total} ${noun} found!`;
         } else {
           tracker.classList.remove('complete');
           trackerLabel.textContent = `🐾 ${found} / ${total} hidden ${noun} found`;
@@ -1021,9 +1032,12 @@
           kitten.classList.add('found');
           found++;
           const lines = currentRound().lines;
-          showToast(lines[Math.floor(Math.random() * lines.length)]);
+          const done = found >= total;
+          showToast(done
+            ? 'You have a gift for finding them 💕'
+            : lines[Math.floor(Math.random() * lines.length)]);
           updateTracker();
-          if (found >= total) rewardAndRestart(kitten);
+          if (done) rewardAndRestart(kitten);
         });
         container.appendChild(kitten);
       }
@@ -1047,6 +1061,9 @@
         // One extra creative hiding spot outside the cards.
         const header = document.querySelector('header');
         if (header) placeKitten(header, { top: '0%', left: 'calc(100% - 24px)' }, 20);
+
+        // The undrawn secret cat is part of this round's target until found.
+        if (SECRET_CAT_ENABLED && !secretClaimed) total++;
 
         tracker.style.position = 'fixed';
         updateTracker();
@@ -1102,23 +1119,23 @@
         requestAnimationFrame(() => badge.classList.add('show'));
       }
 
-      scatterRound();
-
       // The secret heart-spin cat counts toward the total, but is never drawn
       // on the page — it only reveals itself to someone who spins the hero.
-      // Shelved for a later release; flip SECRET_CAT_ENABLED to bring it back.
-      if (SECRET_CAT_ENABLED) {
-        total++;
-        let secretClaimed = false;
-        window.claimSecretCat = function () {
-          if (secretClaimed) return;
-          secretClaimed = true;
-          found++;
-          showToast('The secret cat! 🐱💛');
-          updateTracker();
-        };
-      }
+      // It is a one-time find, so it is added to the tally by scatterRound for
+      // as long as it is unclaimed: counting it once at startup instead left
+      // every later round one short, completing it before the last kitten.
+      window.claimSecretCat = function () {
+        if (!SECRET_CAT_ENABLED || secretClaimed || rewarding) return;
+        secretClaimed = true;
+        found++;
+        showToast('The secret cat! 🐱💛');
+        updateTracker();
+        // The cat can be the find that completes the round, so it has to hand
+        // off to the reward the same way a kitten click does.
+        if (found >= total) rewardAndRestart(document.getElementById('hero'));
+      };
 
+      scatterRound();
       updateTracker();
       setTimeout(() => tracker.classList.add('show'), 800);
     }
@@ -1645,8 +1662,9 @@
         const dx = e.clientX - lastX;
         lastX = e.clientX;
         spinVel = dx * 0.006;
-        // Spinning hard enough, for long enough, wakes the cat.
-        if (!isCat) spinCharge += Math.abs(dx);
+        // Spinning hard enough, for long enough, flips the shape — heart to
+        // cat, cat back to heart, and on and on.
+        spinCharge += Math.abs(dx);
       });
       const endDrag = () => { dragging = false; };
       hero.addEventListener('pointerup', endDrag);
@@ -1682,11 +1700,13 @@
           geometry.attributes.position.needsUpdate = true;
         }
 
-        // Cross the spin threshold → morph heart into cat (and stay a cat).
-        if (SECRET_CAT_ENABLED && !isCat && spinCharge >= SPIN_TO_CAT && elapsed > 3) {
-          isCat = true;
-          spinCharge = 0;  // Reset charge so the next cat cycle starts fresh
-          showCatToast();
+        // Cross the spin threshold → flip between heart and cat. Each charged
+        // spin toggles it, so it goes heart → cat → heart → cat, forever.
+        if (SECRET_CAT_ENABLED && spinCharge >= SPIN_TO_CAT && elapsed > 3
+            && morph === (isCat ? 1 : 0)) {   // wait out the current morph
+          isCat = !isCat;
+          spinCharge = 0;
+          if (isCat) showCatToast();
         }
 
         const want = isCat ? 1 : 0;
@@ -1720,12 +1740,16 @@
         }
 
         if (isCat) {
-          // A cat wants to be looked at: bleed off the spin and settle facing
-          // forward, then just sway gently.
-          spinVel *= 0.94;
+          // A cat wants to be looked at: once you let go it bleeds off the
+          // spin and settles facing forward, then just sways gently. While you
+          // are actually dragging it turns freely, so a second hard spin can
+          // still be charged up to send it back to the heart.
           spin += spinVel;
-          const settle = Math.round(spin / (Math.PI * 2)) * Math.PI * 2;
-          spin += (settle - spin) * 0.05;
+          if (!dragging) {
+            spinVel *= 0.94;
+            const settle = Math.round(spin / (Math.PI * 2)) * Math.PI * 2;
+            spin += (settle - spin) * 0.05;
+          }
           points.rotation.y = spin + Math.sin(elapsed * 0.7) * 0.12;
           points.rotation.x += (tilt * 0.4 - points.rotation.x) * 0.05;
         } else {
