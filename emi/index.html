@@ -948,7 +948,7 @@
         const b = host.getBoundingClientRect();
         // The glyph is inset in its box, so expose a good half of it —
         // less than this and the emoji vanishes entirely behind the host.
-        const showing = 15 + Math.random() * 5;  // px left visible
+        const showing = 18 + Math.random() * 6;  // px left visible
         const buried = KITTEN_BOX - showing;
         const edge = Math.floor(Math.random() * 4);
 
@@ -1021,7 +1021,6 @@
         kitten.textContent = set[Math.floor(Math.random() * set.length)];
         kitten.style.top = spot.top;
         kitten.style.left = spot.left;
-        kitten.style.opacity = '0.2';
         if (size) kitten.style.fontSize = `${size}px`;
         const rot = -18 + Math.random() * 36;
         kitten.style.setProperty('--r', `${rot}deg`);
