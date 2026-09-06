@@ -27,6 +27,8 @@
     max-width: 720px;
     margin: 0 auto;
     padding: 48px 20px 80px;
+    position: relative;
+    z-index: 1;
   }
   header {
     text-align: center;
@@ -40,6 +42,71 @@
   @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.15); }
+  }
+
+  /* 3D particle-heart hero */
+  .hero {
+    position: relative;
+    height: 320px;
+    margin: -20px 0 -14px;
+  }
+  #heartCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .hero-overlay {
+    text-align: center;
+    margin-top: 4px;
+  }
+  .hero-overlay h1 {
+    font-size: 34px;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .hero-overlay p {
+    color: var(--muted);
+    margin: 6px 0 0;
+    font-size: 15px;
+  }
+  .hero-hint {
+    position: absolute;
+    bottom: 26px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #8e4a6c;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeIn 1s ease 2.4s forwards;
+  }
+  /* Static fallback if WebGL is unavailable */
+  .hero.no-webgl #heartCanvas,
+  .hero.no-webgl .hero-hint { display: none; }
+  .hero.no-webgl::before {
+    content: "💗";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 96px;
+    filter: drop-shadow(0 0 24px rgba(255,79,154,0.5));
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  /* Depth parallax on cards */
+  .card {
+    transform: translateY(var(--parallax, 0px));
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { transform: none; }
   }
   h1 {
     font-size: 28px;
@@ -58,7 +125,7 @@
     background: var(--card);
     border: 1px solid #5a2440;
     border-radius: 16px;
-    padding: 26px 24px;
+    padding: 30px 34px;
     margin-bottom: 24px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
   }
@@ -220,13 +287,13 @@
   }
   .hidden-kitten {
     position: absolute;
-    font-size: 18px;
-    opacity: 0.14;
+    font-size: 22px;
+    opacity: 0.85;
     cursor: pointer;
-    filter: grayscale(1);
+    filter: grayscale(0.25);
     transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
     user-select: none;
-    z-index: 5;
+    z-index: 80;
     line-height: 1;
     animation: kittenPeek 3.6s ease-in-out infinite;
   }
@@ -235,11 +302,14 @@
     50% { transform: rotate(var(--r, 0deg)) scale(1.12); }
   }
   .hidden-kitten:hover {
-    opacity: 0.6;
-    filter: grayscale(0.4);
-    transform: rotate(var(--r, 0deg)) scale(1.3);
+    opacity: 1;
+    filter: grayscale(0);
+    transform: rotate(var(--r, 0deg)) scale(1.35);
     animation-play-state: paused;
   }
+  /* Peeking: tucked behind a card, list row or button so only an ear, tail or
+     leaf tip shows. The parent element paints over the rest. */
+  .hidden-kitten.peek { z-index: 2; }
   .hidden-kitten.found {
     opacity: 1 !important;
     filter: grayscale(0) !important;
@@ -291,6 +361,67 @@
     pointer-events: none;
   }
   .kitten-toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Completion reward: a kiss that swells from the final kitten to fill the
+     screen, then fades — followed by a star badge and a fresh round. */
+  .kiss-burst {
+    position: fixed;
+    z-index: 300;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+    line-height: 1;
+    font-size: 64px;
+    will-change: transform, opacity;
+    animation: kissGrow 2.2s cubic-bezier(.22,.9,.3,1) forwards;
+  }
+  @keyframes kissGrow {
+    0%   { transform: translate(-50%,-50%) scale(0.15) rotate(-12deg); opacity: 0; }
+    12%  { opacity: 1; }
+    60%  { opacity: 1; }
+    100% { transform: translate(-50%,-50%) scale(15) rotate(6deg); opacity: 0; }
+  }
+  .kiss-flash {
+    position: fixed;
+    inset: 0;
+    z-index: 299;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--kx, 50%) var(--ky, 50%),
+                rgba(255,79,154,0.45) 0%, rgba(255,79,154,0) 60%);
+    opacity: 0;
+    animation: kissFlash 2.2s ease forwards;
+  }
+  @keyframes kissFlash {
+    0% { opacity: 0; }
+    25% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .star-badge {
+    position: fixed;
+    right: 16px;
+    bottom: 58px;
+    z-index: 60;
+    font-size: 24px;
+    line-height: 1;
+    cursor: default;
+    opacity: 0;
+    transform: scale(0.2) rotate(-40deg);
+    filter: drop-shadow(0 0 10px rgba(255,214,102,0.85));
+    transition: opacity .5s ease, transform .5s cubic-bezier(.2,1.5,.4,1);
+    user-select: none;
+  }
+  .star-badge.show { opacity: 1; transform: scale(1) rotate(0deg); }
+  .star-badge .count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffe66b;
+    margin-left: 2px;
+    vertical-align: super;
+  }
+  @media (max-width: 480px) {
+    .star-badge { bottom: 92px; right: 14px; }
+  }
 
   /* Messages */
   .messages {
@@ -410,6 +541,8 @@
   @media (max-width: 480px) {
     .wrap { padding: 32px 14px 90px; }
     h1 { font-size: 24px; }
+    .hero { height: 260px; }
+    .hero-overlay h1 { font-size: 26px; }
     .card { padding: 20px 16px; }
     .status-box .big { font-size: 34px; }
     .welcome-box h2 { font-size: 24px; }
@@ -433,6 +566,7 @@
     .kitten-toast { left: 14px; right: 14px; bottom: 54px; text-align: center; }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
 </head>
 <body>
   <div class="welcome-overlay" id="welcomeOverlay" style="display:none;">
@@ -448,9 +582,14 @@
 
   <div class="wrap">
     <header>
-      <div class="heart">💌</div>
-      <h1>Boyfriend Guide</h1>
-      <p>and answers to the most common questions.</p>
+      <div class="hero" id="hero">
+        <canvas id="heartCanvas"></canvas>
+        <div class="hero-hint">drag the heart · it's yours</div>
+      </div>
+      <div class="hero-overlay">
+        <h1>Boyfriend Guide</h1>
+        <p>and answers to the most common questions.</p>
+      </div>
     </header>
 
     <section class="card">
@@ -521,6 +660,19 @@
   <div class="kitten-toast" id="kittenToast">Found a hidden kitten! 🐱</div>
 
   <script>
+    // Feature flags — the spin-the-heart-into-a-cat easter egg is built and
+    // working, but held back for a later release. Flip to true to ship it.
+    const SECRET_CAT_ENABLED = false;
+
+    // The 3D particle hero is still being designed, so it runs on localhost
+    // only. Append ?3d=1 to preview it anywhere, ?3d=0 to hide it locally.
+    const HERO_3D_ENABLED = (() => {
+      const q = new URLSearchParams(location.search).get('3d');
+      if (q === '1') return true;
+      if (q === '0') return false;
+      return ['localhost', '127.0.0.1', '::1', ''].includes(location.hostname);
+    })();
+
     function daysBetween(a, b) {
       const MS = 24 * 60 * 60 * 1000;
       const d1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
@@ -726,10 +878,7 @@
       }
     }
 
-    renderMessages();
-
     function renderHiddenKittens() {
-      const kittenEmojis = ['🐱', '🐈', '🐈‍⬛', '🐾'];
       const tracker = document.getElementById('kittenTracker');
       const toast = document.getElementById('kittenToast');
       let total = 0;
@@ -743,82 +892,572 @@
         toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
       }
 
+      // Count lives in its own span so the kitten hiding on the badge itself
+      // isn't wiped out every time the tally updates.
+      const trackerLabel = document.createElement('span');
+      tracker.textContent = '';
+      tracker.appendChild(trackerLabel);
+
+      // Rather than guess at padding, measure real content boxes and drop the
+      // kitten in genuinely empty pixels. Scattered anywhere it fits, so the
+      // spots differ every visit but never land on a word or a button.
+      const KITTEN_BOX = 26;
+
+      function freeSpot(card) {
+        const cardBox = card.getBoundingClientRect();
+        const blockers = [...card.querySelectorAll(
+          'h2, p, li, .btn, .graph-wrap, .message, .status-box, .hidden-kitten')]
+          .map(el => el.getBoundingClientRect());
+
+        const maxLeft = cardBox.width - KITTEN_BOX;
+        const maxTop = cardBox.height - KITTEN_BOX;
+
+        for (let attempt = 0; attempt < 60; attempt++) {
+          const left = Math.random() * maxLeft;
+          const top = Math.random() * maxTop;
+          const x = cardBox.left + left, y = cardBox.top + top;
+          const clash = blockers.some(b =>
+            x + KITTEN_BOX > b.left - 2 && x < b.right + 2 &&
+            y + KITTEN_BOX > b.top - 2 && y < b.bottom + 2);
+          if (!clash) return { top: `${top}px`, left: `${left}px` };
+        }
+        return null; // card is packed; skip rather than cover content
+      }
+
+      // Peek spots: slide the kitten mostly *under* an opaque child (a list row,
+      // the graph panel, a note, the button) so just an ear or tail pokes out.
+      // These are the fun ones, so they're the common case.
+      function peekSpot(card) {
+        const hosts = [...card.querySelectorAll('li, .graph-wrap, .message, .btn, .status-box')]
+          .filter(el => {
+            const b = el.getBoundingClientRect();
+            return b.width > 60 && b.height > 24;
+          });
+        if (!hosts.length) return null;
+
+        const cardBox = card.getBoundingClientRect();
+        const host = hosts[Math.floor(Math.random() * hosts.length)];
+        const b = host.getBoundingClientRect();
+        // The glyph is inset in its box, so expose a good half of it —
+        // less than this and the emoji vanishes entirely behind the host.
+        const showing = 15 + Math.random() * 5;  // px left visible
+        const buried = KITTEN_BOX - showing;
+        const edge = Math.floor(Math.random() * 4);
+
+        // Emoji glyphs sit inset within their line box vertically, so top and
+        // bottom peeks need more of the box clear or nothing shows at all.
+        const vShow = showing + 4;
+        let x, y;
+        if (edge === 0) {                        // peeking over the top edge
+          x = b.left + 12 + Math.random() * Math.max(1, b.width - 40);
+          y = b.top - vShow;
+        } else if (edge === 1) {                 // under the bottom edge
+          x = b.left + 12 + Math.random() * Math.max(1, b.width - 40);
+          y = b.bottom - (KITTEN_BOX - vShow);
+        } else if (edge === 2) {                 // out the left side
+          x = b.left - showing;
+          y = b.top + 4 + Math.random() * Math.max(1, b.height - 30);
+        } else {                                 // out the right side
+          x = b.right - buried;
+          y = b.top + 4 + Math.random() * Math.max(1, b.height - 30);
+        }
+
+        // Keep it inside the card, otherwise it clips away to nothing.
+        if (x < cardBox.left + 2 || x + KITTEN_BOX > cardBox.right - 2) return null;
+        if (y < cardBox.top + 2 || y + KITTEN_BOX > cardBox.bottom - 2) return null;
+
+        return {
+          top: `${y - cardBox.top}px`,
+          left: `${x - cardBox.left}px`,
+          peek: true,
+        };
+      }
+
+      // Each completed round swaps the emoji set, so round two is leaves.
+      const ROUNDS = [
+        { emojis: ['🐱', '🐈', '🐈‍⬛', '🐾'], noun: 'kittens',
+          lines: ['Found a hidden kitten! 🐱', 'Sneaky kitten discovered! 🐈',
+                  'This one was well hidden 🐈‍⬛', 'Kitten collector achievement +1 🐾',
+                  'Purrfect find! 🐾'] },
+        { emojis: ['🍁', '🍂', '🍃'], noun: 'leaves',
+          lines: ['Found a hidden leaf! 🍁', 'Sneaky maple leaf 🍂',
+                  'This one drifted far 🍃', 'Leaf collector +1 🍁',
+                  'Canada approves 🇨🇦'] },
+      ];
+      let round = 0;
+      let stars = 0;
+      let rewarding = false;
+
+      // Rounds cycle, so the game keeps going: kittens, leaves, kittens...
+      function currentRound() { return ROUNDS[round % ROUNDS.length]; }
+
       function updateTracker() {
-        tracker.textContent = `🐾 ${found} / ${total} hidden kittens found`;
-        if (found >= total) {
+        const noun = currentRound().noun;
+        if (total > 0 && found >= total) {
           tracker.classList.add('complete');
-          tracker.textContent = `🎉 All ${total} kittens found! You have a gift for finding cats.`;
+          trackerLabel.textContent = `🎉 All ${total} ${noun} found! You have a gift for finding them.`;
+        } else {
+          tracker.classList.remove('complete');
+          trackerLabel.textContent = `🐾 ${found} / ${total} hidden ${noun} found`;
         }
       }
 
-      // Safe corner/edge spots per card, where real content never renders —
-      // so every kitten is guaranteed clickable, never buried under a button or graph.
-      const cornerSpots = [
-        { top: '4%', left: '3%' },
-        { top: '4%', left: 'calc(100% - 26px)' },
-        { top: 'calc(100% - 26px)', left: '3%' },
-        { top: 'calc(100% - 26px)', left: 'calc(100% - 26px)' },
-      ];
-
       function placeKitten(container, spot, size) {
         total++;
+        const set = currentRound().emojis;
         const kitten = document.createElement('span');
-        kitten.className = 'hidden-kitten';
-        kitten.textContent = kittenEmojis[Math.floor(Math.random() * kittenEmojis.length)];
+        kitten.className = 'hidden-kitten' + (spot.peek ? ' peek' : '');
+        kitten.textContent = set[Math.floor(Math.random() * set.length)];
         kitten.style.top = spot.top;
         kitten.style.left = spot.left;
-        kitten.style.fontSize = `${size || 16}px`;
+        if (size) kitten.style.fontSize = `${size}px`;
         const rot = -18 + Math.random() * 36;
         kitten.style.setProperty('--r', `${rot}deg`);
         kitten.style.animationDelay = `${Math.random() * 2}s`;
-        kitten.setAttribute('aria-label', 'hidden kitten');
+        kitten.setAttribute('aria-label', `hidden ${currentRound().noun}`);
         kitten.addEventListener('click', () => {
-          if (kitten.classList.contains('found')) return;
+          if (kitten.classList.contains('found') || rewarding) return;
           kitten.classList.add('found');
           found++;
-          const lines = [
-            'Found a hidden kitten! 🐱',
-            'Sneaky kitten discovered! 🐈',
-            'This one was well hidden 🐈‍⬛',
-            'Kitten collector achievement +1 🐾',
-            'Purrfect find! 🐾',
-          ];
+          const lines = currentRound().lines;
           showToast(lines[Math.floor(Math.random() * lines.length)]);
           updateTracker();
+          if (found >= total) rewardAndRestart(kitten);
         });
         container.appendChild(kitten);
       }
 
-      // Every card gets 1-2 kittens, tucked into its corners only.
-      document.querySelectorAll('.card').forEach((card) => {
-        const shuffled = [...cornerSpots].sort(() => Math.random() - 0.5);
-        const count = 1 + Math.floor(Math.random() * 2); // 1-2 per card
-        for (let i = 0; i < count; i++) {
-          placeKitten(card, shuffled[i]);
+      // Scatter a full round across the page.
+      function scatterRound() {
+        total = 0;
+        found = 0;
+        document.querySelectorAll('.hidden-kitten').forEach(el => el.remove());
+
+        document.querySelectorAll('.card').forEach((card) => {
+          const count = 2 + Math.floor(Math.random() * 2); // 2-3 per card
+          for (let i = 0; i < count; i++) {
+            // Mostly peeking out from behind something; sometimes in the open.
+            const spot = (Math.random() < 0.7 ? peekSpot(card) : null)
+                      || freeSpot(card) || peekSpot(card);
+            if (spot) placeKitten(card, spot);
+          }
+          // Plus one in the gap below the card — empty by definition.
+          if (Math.random() < 0.75) {
+            placeKitten(card, {
+              top: `calc(100% + ${2 + Math.random() * 12}px)`,
+              left: `${6 + Math.random() * 84}%`,
+            });
+          }
+        });
+
+        // A few extra creative hiding spots outside the cards.
+        const header = document.querySelector('header');
+        if (header) placeKitten(header, { top: '0%', left: 'calc(100% - 24px)' }, 20);
+
+        const footer = document.querySelector('footer');
+        if (footer) {
+          footer.style.position = 'relative';
+          placeKitten(footer, { top: '-26px', left: '14%' }, 20);
         }
-      });
 
-      // A few extra creative hiding spots outside the cards.
-      const header = document.querySelector('header');
-      if (header) placeKitten(header, { top: '0%', left: 'calc(100% - 24px)' }, 15);
-
-      const footer = document.querySelector('footer');
-      if (footer) {
-        footer.style.position = 'relative';
-        placeKitten(footer, { top: '-18px', left: '50%' }, 15);
+        tracker.style.position = 'fixed';
+        placeKitten(tracker, { top: '-20px', left: '-6px' }, 20);
+        updateTracker();
       }
 
-      // One inside the tracker badge itself, once it appears — a reward for close readers.
-      setTimeout(() => {
-        tracker.style.position = 'fixed';
-        placeKitten(tracker, { top: '-20px', left: '-6px' }, 15);
-      }, 900);
+      // The reward: a kiss swells out of the very last one found, floods the
+      // screen, then hands over a star and starts the next round.
+      function rewardAndRestart(lastEl) {
+        if (rewarding) return;
+        rewarding = true;
+
+        const r = lastEl.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+
+        const flash = document.createElement('div');
+        flash.className = 'kiss-flash';
+        flash.style.setProperty('--kx', `${cx}px`);
+        flash.style.setProperty('--ky', `${cy}px`);
+        document.body.appendChild(flash);
+
+        const kiss = document.createElement('div');
+        kiss.className = 'kiss-burst';
+        kiss.textContent = '💋';
+        kiss.style.left = `${cx}px`;
+        kiss.style.top = `${cy}px`;
+        document.body.appendChild(kiss);
+
+        setTimeout(() => {
+          kiss.remove();
+          flash.remove();
+          awardStar();
+          round++;
+          scatterRound();
+          // Re-open scoring only once the new round is on the page, otherwise
+          // every click in the next round is swallowed by this guard.
+          rewarding = false;
+          showToast(`New round: find the ${currentRound().noun}! ${currentRound().emojis[0]}`);
+        }, 2200);
+      }
+
+      function awardStar() {
+        stars++;
+        let badge = document.getElementById('starBadge');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'star-badge';
+          badge.id = 'starBadge';
+          document.body.appendChild(badge);
+        }
+        badge.innerHTML = `⭐<span class="count">${stars}</span>`;
+        badge.title = `${stars} round${stars === 1 ? '' : 's'} completed`;
+        requestAnimationFrame(() => badge.classList.add('show'));
+      }
+
+      scatterRound();
+
+      // The secret heart-spin cat counts toward the total, but is never drawn
+      // on the page — it only reveals itself to someone who spins the hero.
+      // Shelved for a later release; flip SECRET_CAT_ENABLED to bring it back.
+      if (SECRET_CAT_ENABLED) {
+        total++;
+        let secretClaimed = false;
+        window.claimSecretCat = function () {
+          if (secretClaimed) return;
+          secretClaimed = true;
+          found++;
+          showToast('The secret cat! 🐱💛');
+          updateTracker();
+        };
+      }
 
       updateTracker();
       setTimeout(() => tracker.classList.add('show'), 800);
     }
 
-    renderHiddenKittens();
+    // Placement measures real layout, so wait until notes have rendered and
+    // the cards have settled at their final heights.
+    renderMessages().finally(() => {
+      requestAnimationFrame(() => requestAnimationFrame(renderHiddenKittens));
+    });
+
+    // ---- 3D particle heart hero ----
+    function renderHeartHero() {
+      const hero = document.getElementById('hero');
+      const canvas = document.getElementById('heartCanvas');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Not ready for prime time yet: fall back to the static heart, which is
+      // the same graceful path used when WebGL is unavailable.
+      if (!HERO_3D_ENABLED || typeof THREE === 'undefined') {
+        hero.classList.add('no-webgl');
+        return;
+      }
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      } catch (err) {
+        hero.classList.add('no-webgl');
+        return;
+      }
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      camera.position.z = 4.2;
+
+      // Parametric heart surface. The classic 2D heart curve, given depth by
+      // squeezing z toward the edges so it reads as a solid volume, not a card.
+      function heartPoint(t, u) {
+        const x = 16 * Math.pow(Math.sin(t), 3);
+        const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t)
+                - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        const s = 0.062;
+        const bulge = Math.sqrt(Math.max(0, 1 - u * u));
+        const width = 1 - 0.45 * Math.abs(y) / 17;
+        return new THREE.Vector3(x * s, y * s, u * 0.42 * bulge * width);
+      }
+
+      // Cat head: round face, two ears, whiskers. Sampled as a filled volume so
+      // it holds together while spinning, same as the heart.
+      function catPoint() {
+        const r = Math.random();
+        const v = new THREE.Vector3();
+        const puff = () => (Math.random() - 0.5) * 0.06;
+
+        if (r < 0.62) {
+          // Face — a wide, flattened disc so it reads as a head from the front.
+          const a = Math.random() * Math.PI * 2;
+          const rad = Math.pow(Math.random(), 0.5);
+          v.set(
+            rad * Math.cos(a) * 1.05,
+            rad * Math.sin(a) * 0.86,
+            (Math.random() - 0.5) * 0.34 * (1 - rad * 0.5)
+          );
+        } else if (r < 0.86) {
+          // Ears — two squat triangles perched on the head's top corners.
+          const side = Math.random() < 0.5 ? -1 : 1;
+          const h = Math.pow(Math.random(), 0.7);  // 0 base → 1 tip
+          const halfW = (1 - h) * 0.30;
+          v.set(
+            side * 0.58 + (Math.random() - 0.5) * 2 * halfW,
+            0.66 + h * 0.42,
+            (Math.random() - 0.5) * 0.20 * (1 - h)
+          );
+        } else {
+          // Whiskers — three strands per side, thin lines off the muzzle.
+          const side = Math.random() < 0.5 ? -1 : 1;
+          const strand = Math.floor(Math.random() * 3);
+          const t = Math.random();
+          v.set(
+            side * (0.30 + t * 0.85),
+            -0.16 - strand * 0.14 + t * (strand - 1) * 0.16,
+            0.28 + puff()
+          );
+        }
+        v.x += puff(); v.y += puff(); v.z += puff();
+        return v.multiplyScalar(1.05);
+      }
+
+      const COUNT = window.innerWidth < 480 ? 2600 : 4800;
+      const targets = new Float32Array(COUNT * 3);
+      const catTargets = new Float32Array(COUNT * 3);
+      const starts = new Float32Array(COUNT * 3);
+      const positions = new Float32Array(COUNT * 3);
+      const colors = new Float32Array(COUNT * 3);
+      const heartColors = new Float32Array(COUNT * 3);
+      const catColors = new Float32Array(COUNT * 3);
+      const delays = new Float32Array(COUNT);
+
+      const cLow = new THREE.Color('#ff4f9a');
+      const cHigh = new THREE.Color('#a78bfa');
+      const catLow = new THREE.Color('#ffb300');
+      const catHigh = new THREE.Color('#ffe66b');
+      const tmp = new THREE.Color();
+
+      for (let i = 0; i < COUNT; i++) {
+        const t = Math.random() * Math.PI * 2;
+        const u = Math.random() * 2 - 1;
+        // Bias a portion inward so the volume is filled, not just a shell.
+        const shrink = Math.random() < 0.35 ? 0.45 + Math.random() * 0.5 : 1;
+        const p = heartPoint(t, u).multiplyScalar(shrink);
+
+        targets[i * 3] = p.x;
+        targets[i * 3 + 1] = p.y;
+        targets[i * 3 + 2] = p.z;
+
+        // Start scattered on a wide sphere, so the heart "assembles" on load.
+        const a = Math.random() * Math.PI * 2;
+        const b = Math.acos(Math.random() * 2 - 1);
+        const r = 3.5 + Math.random() * 3;
+        starts[i * 3] = r * Math.sin(b) * Math.cos(a);
+        starts[i * 3 + 1] = r * Math.sin(b) * Math.sin(a);
+        starts[i * 3 + 2] = r * Math.cos(b);
+
+        positions[i * 3] = starts[i * 3];
+        positions[i * 3 + 1] = starts[i * 3 + 1];
+        positions[i * 3 + 2] = starts[i * 3 + 2];
+
+        tmp.copy(cLow).lerp(cHigh, Math.random() * 0.75 + (p.y + 0.9) * 0.15);
+        colors[i * 3] = heartColors[i * 3] = tmp.r;
+        colors[i * 3 + 1] = heartColors[i * 3 + 1] = tmp.g;
+        colors[i * 3 + 2] = heartColors[i * 3 + 2] = tmp.b;
+
+        // Cat: same particles, a warm yellow/amber ramp.
+        const c = catPoint();
+        catTargets[i * 3] = c.x;
+        catTargets[i * 3 + 1] = c.y;
+        catTargets[i * 3 + 2] = c.z;
+
+        tmp.copy(catLow).lerp(catHigh, Math.random());
+        catColors[i * 3] = tmp.r;
+        catColors[i * 3 + 1] = tmp.g;
+        catColors[i * 3 + 2] = tmp.b;
+
+        delays[i] = Math.random() * 0.45;
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      // Round, soft sprite so particles glow instead of looking like squares.
+      const sprite = (() => {
+        const c = document.createElement('canvas');
+        c.width = c.height = 64;
+        const ctx = c.getContext('2d');
+        const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        g.addColorStop(0, 'rgba(255,255,255,1)');
+        g.addColorStop(0.35, 'rgba(255,255,255,0.7)');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 64, 64);
+        return new THREE.CanvasTexture(c);
+      })();
+
+      const material = new THREE.PointsMaterial({
+        size: 0.055,
+        map: sprite,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.95,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const points = new THREE.Points(geometry, material);
+      scene.add(points);
+
+      function resize() {
+        const w = hero.clientWidth;
+        const h = hero.clientHeight;
+        if (!w || !h) return;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Drag to spin, with inertia; pointer also nudges the tilt.
+      let dragging = false, lastX = 0, spin = 0, spinVel = 0.0025, tilt = 0;
+      // Easter egg: spin the heart enough and it becomes a yellow cat.
+      const SPIN_TO_CAT = 1400;   // px of cumulative drag
+      let spinCharge = 0, isCat = false, morph = 0;
+      // Listen on the hero, not the canvas: a kitten hiding up here sits above
+      // the canvas and would otherwise swallow the drag.
+      hero.style.touchAction = 'pan-y';
+      hero.addEventListener('pointerdown', (e) => {
+        if (e.target.classList && e.target.classList.contains('hidden-kitten')) return;
+        dragging = true;
+        lastX = e.clientX;
+        hero.setPointerCapture(e.pointerId);
+      });
+      hero.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX;
+        lastX = e.clientX;
+        spinVel = dx * 0.006;
+        // Spinning hard enough, for long enough, wakes the cat.
+        if (!isCat) spinCharge += Math.abs(dx);
+      });
+      const endDrag = () => { dragging = false; };
+      hero.addEventListener('pointerup', endDrag);
+      hero.addEventListener('pointercancel', endDrag);
+      hero.addEventListener('pointermove', (e) => {
+        const r = hero.getBoundingClientRect();
+        tilt = ((e.clientY - r.top) / r.height - 0.5) * 0.5;
+      });
+
+      function showCatToast() {
+        if (typeof window.claimSecretCat === 'function') window.claimSecretCat();
+      }
+
+      const clock = new THREE.Clock();
+      const pos = geometry.attributes.position.array;
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const elapsed = clock.getElapsedTime();
+
+        // Assemble: ease each particle from its scattered start to the heart.
+        if (elapsed < 3) {
+          for (let i = 0; i < COUNT; i++) {
+            const raw = (elapsed - 0.4 - delays[i]) / 1.9;
+            const k = Math.max(0, Math.min(1, raw));
+            const e = 1 - Math.pow(1 - k, 3);
+            const i3 = i * 3;
+            pos[i3] = starts[i3] + (targets[i3] - starts[i3]) * e;
+            pos[i3 + 1] = starts[i3 + 1] + (targets[i3 + 1] - starts[i3 + 1]) * e;
+            pos[i3 + 2] = starts[i3 + 2] + (targets[i3 + 2] - starts[i3 + 2]) * e;
+          }
+          geometry.attributes.position.needsUpdate = true;
+        }
+
+        // Cross the spin threshold → morph heart into cat (and stay a cat).
+        if (SECRET_CAT_ENABLED && !isCat && spinCharge >= SPIN_TO_CAT && elapsed > 3) {
+          isCat = true;
+          showCatToast();
+        }
+
+        const want = isCat ? 1 : 0;
+        if (morph !== want) {
+          morph += (want - morph) * 0.045;
+          if (Math.abs(want - morph) < 0.001) morph = want;
+
+          const col = geometry.attributes.color.array;
+          const ease = morph < 0.5
+            ? 4 * morph * morph * morph
+            : 1 - Math.pow(-2 * morph + 2, 3) / 2;
+          for (let i = 0; i < COUNT; i++) {
+            const i3 = i * 3;
+            // Bow the paths outward mid-morph so it bursts rather than sliding.
+            const puff = Math.sin(ease * Math.PI) * 0.55;
+            for (let k = 0; k < 3; k++) {
+              const from = targets[i3 + k];
+              const to = catTargets[i3 + k];
+              pos[i3 + k] = from + (to - from) * ease + (k === 2 ? 0 : starts[i3 + k] * 0.06 * puff);
+              col[i3 + k] = heartColors[i3 + k] + (catColors[i3 + k] - heartColors[i3 + k]) * ease;
+            }
+          }
+          geometry.attributes.position.needsUpdate = true;
+          geometry.attributes.color.needsUpdate = true;
+        }
+
+        if (isCat) {
+          // A cat wants to be looked at: bleed off the spin and settle facing
+          // forward, then just sway gently.
+          spinVel *= 0.94;
+          spin += spinVel;
+          const settle = Math.round(spin / (Math.PI * 2)) * Math.PI * 2;
+          spin += (settle - spin) * 0.05;
+          points.rotation.y = spin + Math.sin(elapsed * 0.7) * 0.12;
+          points.rotation.x += (tilt * 0.4 - points.rotation.x) * 0.05;
+        } else {
+          if (!dragging) spinVel += (0.0025 - spinVel) * 0.03;
+          spin += spinVel;
+          points.rotation.y = spin;
+          points.rotation.x += (tilt - points.rotation.x) * 0.05;
+        }
+
+        // Heartbeat: a double-thump scale, the same rhythm as the 💌 pulse.
+        const beat = elapsed * 1.6;
+        const phase = beat % 1;
+        const thump = Math.exp(-phase * 9) * 0.05 + Math.exp(-Math.abs(phase - 0.22) * 14) * 0.03;
+        const s = 1 + (reduceMotion ? 0 : thump);
+        points.scale.setScalar(s);
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    renderHeartHero();
+
+    // Depth parallax: cards drift at slightly different rates as you scroll.
+    (function parallaxCards() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const cards = [...document.querySelectorAll('.card')];
+      let ticking = false;
+      function update() {
+        const vh = window.innerHeight;
+        cards.forEach((card, i) => {
+          const r = card.getBoundingClientRect();
+          const centered = (r.top + r.height / 2 - vh / 2) / vh;
+          const depth = 5 + (i % 3) * 4;
+          card.style.setProperty('--parallax', `${(-centered * depth).toFixed(2)}px`);
+        });
+        ticking = false;
+      }
+      window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(update);
+      }, { passive: true });
+      update();
+    })();
   </script>
 </body>
 </html>
