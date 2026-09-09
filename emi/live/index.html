@@ -2,93 +2,93 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Kitten Cam — Live for Emi 🐱</title>
 <meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#180510" />
 <style>
   :root {
-    --bg: #2a0a1a;
-    --card: #3a1428;
     --accent: #ff4f9a;
     --accent2: #ff9ecb;
     --text: #fff0f6;
     --muted: #e0a8c4;
     --live: #ff3355;
+    /* Safe-area insets so nothing hides under a phone notch or home bar. */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
   }
   * { box-sizing: border-box; }
   html, body {
     margin: 0;
     padding: 0;
-    background: radial-gradient(circle at top, #4a1330 0%, #2a0a1a 60%);
+    height: 100%;
+    background: #180510;
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    min-height: 100%;
-  }
-  .wrap {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 32px 20px 80px;
-  }
-
-  /* Back link to the guide it came from */
-  .back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    margin-bottom: 18px;
-  }
-  .back:hover { color: var(--accent2); }
-
-  header { margin-bottom: 18px; }
-  h1 {
-    font-size: 26px;
-    margin: 0 0 4px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  header p {
-    color: var(--muted);
-    margin: 0;
-    font-size: 14px;
-  }
-
-  /* The player */
-  .player {
-    position: relative;
-    background: #180510;
-    border: 1px solid #5a2440;
-    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    overscroll-behavior: none;
   }
-  .player video {
-    display: block;
+
+  /* The stage fills the viewport. Uses dvh where supported so mobile browser
+     chrome collapsing doesn't leave a gap at the bottom. */
+  .stage {
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  /* The video covers the stage, cropping rather than letterboxing. */
+  .stage video {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    display: block;
     background: #180510;
   }
-  /* Overlaid broadcast furniture */
-  .badges {
+  /* Vignette top and bottom so overlaid text stays readable over any frame. */
+  .stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0) 22%),
+      linear-gradient(0deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0) 42%);
+  }
+
+  /* ---- Top bar: back link, live badge, viewers, uptime ---- */
+  .topbar {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    padding: 12px;
+    z-index: 3;
     display: flex;
     align-items: center;
     gap: 8px;
-    pointer-events: none;
-    /* Scrim: the video underneath is bright, so the overlay needs its own
-       darkening or the badges wash out. */
-    background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0));
-    /* Above the veil, which would otherwise blur and dim them. */
-    z-index: 2;
+    flex-wrap: wrap;
+    padding: calc(12px + var(--sat)) calc(14px + var(--sar)) 12px calc(14px + var(--sal));
   }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    padding: 6px 11px;
+    border-radius: 999px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  .back:hover { color: var(--accent2); }
   .live-badge {
     display: inline-flex;
     align-items: center;
@@ -114,9 +114,9 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.25; }
   }
-  .viewers {
-    background: rgba(0,0,0,0.62);
-    backdrop-filter: blur(4px);
+  .pill {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
     color: #fff;
     font-size: 11px;
     font-weight: 600;
@@ -124,29 +124,152 @@
     border-radius: 5px;
     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
   }
-  .uptime {
-    margin-left: auto;
-    background: rgba(0,0,0,0.62);
-    backdrop-filter: blur(4px);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 5px 9px;
-    border-radius: 5px;
-    font-variant-numeric: tabular-nums;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  .uptime { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  /* ---- Title, lower-left, broadcast style ---- */
+  .title {
+    position: absolute;
+    z-index: 3;
+    left: calc(16px + var(--sal));
+    bottom: calc(88px + var(--sab));
+    max-width: 60%;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
   }
-  /* Tap-to-start veil: autoplay with sound is blocked, so the first tap
-     both unmutes and satisfies the gesture requirement. */
+  .title h1 {
+    font-size: 22px;
+    margin: 0 0 2px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  .title p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+  }
+
+  /* ---- Bottom control bar ---- */
+  .controls {
+    position: absolute;
+    z-index: 4;
+    left: calc(14px + var(--sal));
+    right: calc(14px + var(--sar));
+    bottom: calc(14px + var(--sab));
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chip {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .chip:active { transform: scale(0.97); }
+  .chip.on {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-color: transparent;
+  }
+  .chip.icon { padding: 9px 12px; }
+  .spacer { margin-left: auto; }
+
+  /* ---- Chat, overlaid bottom-right ---- */
+  .chatwrap {
+    position: absolute;
+    z-index: 3;
+    right: calc(14px + var(--sar));
+    bottom: calc(70px + var(--sab));
+    width: min(340px, calc(100vw - 28px));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 0.3s ease;
+  }
+  .chat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 40vh;
+    overflow-y: auto;
+    /* Fade the top so older lines dissolve instead of cutting off hard. */
+    mask-image: linear-gradient(180deg, transparent 0, #000 34px);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 34px);
+    scrollbar-width: none;
+  }
+  .chat::-webkit-scrollbar { display: none; }
+  .msg {
+    align-self: flex-start;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 7px 11px;
+    font-size: 13px;
+    line-height: 1.45;
+    max-width: 100%;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    animation: slideIn 0.35s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  .msg .who { font-weight: 700; color: var(--accent2); margin-right: 5px; }
+  .msg.mine { align-self: flex-end; background: rgba(255,79,154,0.32); }
+  .msg.mine .who { color: #cdeaff; }
+  .say { display: flex; gap: 6px; }
+  .say input {
+    flex: 1;
+    min-width: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    padding: 9px 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .say input::placeholder { color: rgba(255,240,246,0.55); }
+  .say input:focus { outline: none; border-color: var(--accent); }
+  .say button {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    font-family: inherit;
+    padding: 9px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .say button:active { transform: scale(0.97); }
+
+  /* Idle: the furniture fades away so it is just kittens. Any move brings
+     it back. Never hides while typing or when the veil is still up. */
+  body.idle .title,
+  body.idle .chatwrap,
+  body.idle .controls,
+  body.idle .topbar { opacity: 0; pointer-events: none; }
+  .topbar, .controls { transition: opacity 0.3s ease; }
+
+  /* ---- Tap-to-start veil ---- */
   .veil {
     position: absolute;
     inset: 0;
+    z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    background: rgba(24,5,16,0.72);
+    gap: 12px;
+    background: rgba(24,5,16,0.6);
     backdrop-filter: blur(3px);
     cursor: pointer;
     text-align: center;
@@ -154,144 +277,34 @@
   }
   .veil.hide { display: none; }
   .veil .play {
-    width: 62px;
-    height: 62px;
+    width: 74px;
+    height: 74px;
     border-radius: 50%;
     background: linear-gradient(90deg, var(--accent), var(--accent2));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 6px 24px rgba(255,79,154,0.45);
+    font-size: 28px;
+    box-shadow: 0 6px 28px rgba(255,79,154,0.5);
   }
-  .veil span { color: var(--muted); font-size: 13px; }
+  .veil span { color: var(--text); font-size: 14px; text-shadow: 0 1px 6px rgba(0,0,0,0.7); }
 
-  /* Sound toggle sits under the player, not over the video */
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
-    flex-wrap: wrap;
+  /* Phones: chat sits above the bar, full width, and shorter. */
+  @media (max-width: 560px) {
+    .title { bottom: auto; top: calc(56px + var(--sat)); max-width: calc(100% - 32px); }
+    .title h1 { font-size: 19px; }
+    .chatwrap {
+      left: calc(14px + var(--sal));
+      width: auto;
+      bottom: calc(66px + var(--sab));
+    }
+    .chat { max-height: 32vh; }
+    .stream-note { display: none; }
   }
-  .chip {
-    background: #4a1c34;
-    border: 1px solid #5a2440;
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 8px 14px;
-    border-radius: 999px;
-    cursor: pointer;
-  }
-  .chip:active { transform: scale(0.97); }
-  .chip.on {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-color: transparent;
-    color: #fff;
-  }
-  .stream-note {
-    color: #a85f82;
-    font-size: 12px;
-    margin-left: auto;
-  }
-
-  /* Cards, matching the guide */
-  .card {
-    background: var(--card);
-    border: 1px solid #5a2440;
-    border-radius: 16px;
-    padding: 22px 24px;
-    margin-top: 24px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-  }
-  .card h2 {
-    font-size: 17px;
-    margin: 0 0 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .card p {
-    color: #ddd;
-    line-height: 1.6;
-    margin: 0 0 10px;
-    font-size: 14px;
-  }
-  .card p:last-child { margin-bottom: 0; }
-
-  /* Chat */
-  .chat {
-    max-height: 260px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-right: 4px;
-  }
-  .chat::-webkit-scrollbar { width: 6px; }
-  .chat::-webkit-scrollbar-thumb { background: #5a2440; border-radius: 3px; }
-  .msg {
-    background: #4a1c34;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 14px;
-    line-height: 1.45;
-    animation: slideIn 0.35s ease;
-  }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: none; }
-  }
-  .msg .who {
-    font-weight: 700;
-    color: var(--accent2);
-    margin-right: 6px;
-  }
-  .msg.mine .who { color: #8fd6ff; }
-
-  /* Viewer's own line — it never leaves the browser, so say so. */
-  .say {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .say input {
-    flex: 1;
-    min-width: 0;
-    background: #240816;
-    border: 1px solid #5a2440;
-    border-radius: 10px;
-    padding: 10px 12px;
-    color: var(--text);
-    font-size: 14px;
-    font-family: inherit;
-  }
-  .say input::placeholder { color: #a85f82; }
-  .say input:focus { outline: none; border-color: var(--accent); }
-  .say button {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border: none;
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-  }
-  .say button:active { transform: scale(0.97); }
-
-  footer {
-    text-align: center;
-    color: #a85f82;
-    font-size: 12px;
-    margin-top: 36px;
-  }
-
-  @media (max-width: 520px) {
-    .wrap { padding: 20px 14px 60px; }
-    .card { padding: 18px 16px; }
-    .stream-note { margin-left: 0; width: 100%; }
+  /* Landscape phones are short: drop the title so chat and controls fit. */
+  @media (max-height: 430px) {
+    .title { display: none; }
+    .chat { max-height: 30vh; }
   }
   @media (prefers-reduced-motion: reduce) {
     .live-badge .dot, .msg { animation: none; }
@@ -299,55 +312,40 @@
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <a class="back" href="/emi/">← back to the boyfriend guide</a>
+  <div class="stage" id="stage">
+    <video id="stream" playsinline loop muted preload="auto"
+           poster="poster.jpg" src="cats.mp4"></video>
 
-    <header>
+    <div class="topbar" id="topbar">
+      <a class="back" href="/emi/">← back to the guide</a>
+      <span class="live-badge"><span class="dot"></span>Live</span>
+      <span class="pill" id="viewers">👀 2 watching</span>
+      <span class="pill uptime" id="uptime">00:00:00</span>
+    </div>
+
+    <div class="title" id="title">
       <h1>🐱 Kitten Cam</h1>
-      <p>Broadcasting non-stop, just for you.</p>
-    </header>
-
-    <div class="player">
-      <video id="stream" playsinline loop muted preload="auto"
-             poster="poster.jpg" src="cats.mp4"></video>
-      <div class="badges">
-        <span class="live-badge"><span class="dot"></span>Live</span>
-        <span class="viewers" id="viewers">👀 2 watching</span>
-        <span class="uptime" id="uptime">00:00:00</span>
-      </div>
-      <div class="veil" id="veil">
-        <div class="play">▶</div>
-        <span>Tap to join the stream 💕</span>
-      </div>
+      <p>Broadcasting non-stop, just for you. 💕</p>
     </div>
 
-    <div class="controls">
-      <button class="chip" id="soundBtn">🔇 Sound off</button>
-      <span class="stream-note">Uptime is counted since you opened this.</span>
-    </div>
-
-    <section class="card">
-      <h2>About this channel</h2>
-      <p>Round-the-clock kitten coverage, brought to you by the same guy who
-        hides them all over your guide. No schedule, no ads, no ending —
-        it just keeps going, a bit like how much he misses you.</p>
-      <p>Two viewers, always. You and him. 💕</p>
-    </section>
-
-    <section class="card">
-      <h2>💬 Stream chat</h2>
+    <div class="chatwrap" id="chatwrap">
       <div class="chat" id="chat"></div>
       <div class="say">
         <input id="sayInput" type="text" maxlength="120"
                placeholder="Say something to the kittens..." />
         <button id="sayBtn">Send</button>
       </div>
-      <p style="margin-top:10px;font-size:12px;color:#a85f82;">
-        Your messages stay in this browser — nobody else can read them.
-      </p>
-    </section>
+    </div>
 
-    <footer>tvůj Jakub 🩵</footer>
+    <div class="controls">
+      <button class="chip" id="soundBtn">🔇 Sound off</button>
+      <button class="chip icon" id="fsBtn" title="Fullscreen">⛶</button>
+    </div>
+
+    <div class="veil" id="veil">
+      <div class="play">▶</div>
+      <span>Tap to join the stream 💕</span>
+    </div>
   </div>
 
   <script>
@@ -357,6 +355,8 @@
     const video = document.getElementById('stream');
     const veil = document.getElementById('veil');
     const soundBtn = document.getElementById('soundBtn');
+    const fsBtn = document.getElementById('fsBtn');
+    const stage = document.getElementById('stage');
 
     video.play().catch(() => { /* poster stays up until the tap */ });
 
@@ -365,6 +365,7 @@
       video.muted = false;
       video.play().catch(() => {});
       syncSoundBtn();
+      kick();
     }
     veil.addEventListener('click', join);
 
@@ -379,6 +380,68 @@
       syncSoundBtn();
     });
     syncSoundBtn();
+
+    // ---- Real fullscreen --------------------------------------------------
+    // The page is already viewport-filling; this goes to true OS fullscreen.
+    // iPhone Safari exposes no element fullscreen, so there we fall back to
+    // the video's own native fullscreen and hide the button if neither exists.
+    function fsElement() {
+      return document.fullscreenElement || document.webkitFullscreenElement;
+    }
+    function canFullscreen() {
+      return !!(stage.requestFullscreen || stage.webkitRequestFullscreen
+                || video.webkitEnterFullscreen);
+    }
+    function toggleFullscreen() {
+      if (fsElement()) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        return;
+      }
+      if (stage.requestFullscreen) stage.requestFullscreen().catch(() => {});
+      else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
+      else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+    }
+    if (!canFullscreen()) fsBtn.style.display = 'none';
+    fsBtn.addEventListener('click', toggleFullscreen);
+    function syncFsBtn() {
+      const on = !!fsElement();
+      fsBtn.textContent = on ? '⛶' : '⛶';
+      fsBtn.title = on ? 'Exit fullscreen' : 'Fullscreen';
+      fsBtn.classList.toggle('on', on);
+    }
+    document.addEventListener('fullscreenchange', syncFsBtn);
+    document.addEventListener('webkitfullscreenchange', syncFsBtn);
+
+    // Double-tap / double-click the video toggles fullscreen, like any player.
+    stage.addEventListener('dblclick', (e) => {
+      if (e.target.closest('.controls, .chatwrap, .topbar')) return;
+      toggleFullscreen();
+    });
+    // "f" toggles fullscreen, "m" mutes — but not while typing in the chat.
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'f') toggleFullscreen();
+      if (e.key === 'm') soundBtn.click();
+    });
+
+    // ---- Idle fade --------------------------------------------------------
+    // After a few still seconds the overlay clears so it is only kittens.
+    let idleTimer;
+    function kick() {
+      document.body.classList.remove('idle');
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        // Never fade out while the veil is up or the chat box has focus.
+        // Looked up by id rather than closing over the `const` below, which
+        // is not yet initialised when kick() first runs.
+        if (veil.classList.contains('hide') &&
+            document.activeElement !== document.getElementById('sayInput')) {
+          document.body.classList.add('idle');
+        }
+      }, 4000);
+    }
+    ['mousemove', 'pointerdown', 'keydown', 'touchstart', 'wheel']
+      .forEach(ev => document.addEventListener(ev, kick, { passive: true }));
 
     // ---- Uptime -----------------------------------------------------------
     // A real stream shows how long it has been up; this one counts from the
@@ -405,6 +468,10 @@
     const chat = document.getElementById('chat');
     const sayInput = document.getElementById('sayInput');
     const sayBtn = document.getElementById('sayBtn');
+
+    // Typing or focusing the chat must keep the overlay awake.
+    sayInput.addEventListener('focus', kick);
+    sayInput.addEventListener('input', kick);
 
     const LINES = [
       ['Jakub', 'welcome to the stream 💕'],
@@ -436,7 +503,7 @@
       el.appendChild(document.createTextNode(text));
       chat.appendChild(el);
       // Keep the log short so it never grows without bound over a long watch.
-      while (chat.children.length > 40) chat.removeChild(chat.firstChild);
+      while (chat.children.length > 25) chat.removeChild(chat.firstChild);
       chat.scrollTop = chat.scrollHeight;
     }
 
@@ -452,6 +519,7 @@
       if (!text) return;
       push('Emi 💗', text, true);
       sayInput.value = '';
+      kick();
       // He is always watching this stream, so he always answers.
       setTimeout(() => {
         const replies = [
@@ -463,6 +531,8 @@
     }
     sayBtn.addEventListener('click', send);
     sayInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+
+    kick();
   </script>
 </body>
 </html>
