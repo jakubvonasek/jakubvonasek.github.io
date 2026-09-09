@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kitten Cam — Live for Emi 🐱</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root {
+    --bg: #2a0a1a;
+    --card: #3a1428;
+    --accent: #ff4f9a;
+    --accent2: #ff9ecb;
+    --text: #fff0f6;
+    --muted: #e0a8c4;
+    --live: #ff3355;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at top, #4a1330 0%, #2a0a1a 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100%;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  /* Back link to the guide it came from */
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .back:hover { color: var(--accent2); }
+
+  header { margin-bottom: 18px; }
+  h1 {
+    font-size: 26px;
+    margin: 0 0 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 14px;
+  }
+
+  /* The player */
+  .player {
+    position: relative;
+    background: #180510;
+    border: 1px solid #5a2440;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .player video {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #180510;
+  }
+  /* Overlaid broadcast furniture */
+  .badges {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    /* Scrim: the video underneath is bright, so the overlay needs its own
+       darkening or the badges wash out. */
+    background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0));
+    /* Above the veil, which would otherwise blur and dim them. */
+    z-index: 2;
+  }
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--live);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 5px 9px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+  }
+  .live-badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+  .viewers {
+    background: rgba(0,0,0,0.62);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 9px;
+    border-radius: 5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  .uptime {
+    margin-left: auto;
+    background: rgba(0,0,0,0.62);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 9px;
+    border-radius: 5px;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  /* Tap-to-start veil: autoplay with sound is blocked, so the first tap
+     both unmutes and satisfies the gesture requirement. */
+  .veil {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(24,5,16,0.72);
+    backdrop-filter: blur(3px);
+    cursor: pointer;
+    text-align: center;
+    padding: 20px;
+  }
+  .veil.hide { display: none; }
+  .veil .play {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 6px 24px rgba(255,79,154,0.45);
+  }
+  .veil span { color: var(--muted); font-size: 13px; }
+
+  /* Sound toggle sits under the player, not over the video */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    background: #4a1c34;
+    border: 1px solid #5a2440;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .chip:active { transform: scale(0.97); }
+  .chip.on {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-color: transparent;
+    color: #fff;
+  }
+  .stream-note {
+    color: #a85f82;
+    font-size: 12px;
+    margin-left: auto;
+  }
+
+  /* Cards, matching the guide */
+  .card {
+    background: var(--card);
+    border: 1px solid #5a2440;
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-top: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .card h2 {
+    font-size: 17px;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card p {
+    color: #ddd;
+    line-height: 1.6;
+    margin: 0 0 10px;
+    font-size: 14px;
+  }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* Chat */
+  .chat {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+  }
+  .chat::-webkit-scrollbar { width: 6px; }
+  .chat::-webkit-scrollbar-thumb { background: #5a2440; border-radius: 3px; }
+  .msg {
+    background: #4a1c34;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.45;
+    animation: slideIn 0.35s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  .msg .who {
+    font-weight: 700;
+    color: var(--accent2);
+    margin-right: 6px;
+  }
+  .msg.mine .who { color: #8fd6ff; }
+
+  /* Viewer's own line — it never leaves the browser, so say so. */
+  .say {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .say input {
+    flex: 1;
+    min-width: 0;
+    background: #240816;
+    border: 1px solid #5a2440;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .say input::placeholder { color: #a85f82; }
+  .say input:focus { outline: none; border-color: var(--accent); }
+  .say button {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .say button:active { transform: scale(0.97); }
+
+  footer {
+    text-align: center;
+    color: #a85f82;
+    font-size: 12px;
+    margin-top: 36px;
+  }
+
+  @media (max-width: 520px) {
+    .wrap { padding: 20px 14px 60px; }
+    .card { padding: 18px 16px; }
+    .stream-note { margin-left: 0; width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .live-badge .dot, .msg { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="/emi/">← back to the boyfriend guide</a>
+
+    <header>
+      <h1>🐱 Kitten Cam</h1>
+      <p>Broadcasting non-stop, just for you.</p>
+    </header>
+
+    <div class="player">
+      <video id="stream" playsinline loop muted preload="auto"
+             poster="poster.jpg" src="cats.mp4"></video>
+      <div class="badges">
+        <span class="live-badge"><span class="dot"></span>Live</span>
+        <span class="viewers" id="viewers">👀 2 watching</span>
+        <span class="uptime" id="uptime">00:00:00</span>
+      </div>
+      <div class="veil" id="veil">
+        <div class="play">▶</div>
+        <span>Tap to join the stream 💕</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="chip" id="soundBtn">🔇 Sound off</button>
+      <span class="stream-note">Uptime is counted since you opened this.</span>
+    </div>
+
+    <section class="card">
+      <h2>About this channel</h2>
+      <p>Round-the-clock kitten coverage, brought to you by the same guy who
+        hides them all over your guide. No schedule, no ads, no ending —
+        it just keeps going, a bit like how much he misses you.</p>
+      <p>Two viewers, always. You and him. 💕</p>
+    </section>
+
+    <section class="card">
+      <h2>💬 Stream chat</h2>
+      <div class="chat" id="chat"></div>
+      <div class="say">
+        <input id="sayInput" type="text" maxlength="120"
+               placeholder="Say something to the kittens..." />
+        <button id="sayBtn">Send</button>
+      </div>
+      <p style="margin-top:10px;font-size:12px;color:#a85f82;">
+        Your messages stay in this browser — nobody else can read them.
+      </p>
+    </section>
+
+    <footer>tvůj Jakub 🩵</footer>
+  </div>
+
+  <script>
+    // ---- Player -----------------------------------------------------------
+    // Autoplay is only permitted while muted, so the stream starts silent and
+    // the veil's tap is what buys us the right to turn sound on.
+    const video = document.getElementById('stream');
+    const veil = document.getElementById('veil');
+    const soundBtn = document.getElementById('soundBtn');
+
+    video.play().catch(() => { /* poster stays up until the tap */ });
+
+    function join() {
+      veil.classList.add('hide');
+      video.muted = false;
+      video.play().catch(() => {});
+      syncSoundBtn();
+    }
+    veil.addEventListener('click', join);
+
+    function syncSoundBtn() {
+      const on = !video.muted && video.volume > 0;
+      soundBtn.textContent = on ? '🔊 Sound on' : '🔇 Sound off';
+      soundBtn.classList.toggle('on', on);
+    }
+    soundBtn.addEventListener('click', () => {
+      video.muted = !video.muted;
+      if (!video.muted) video.play().catch(() => {});
+      syncSoundBtn();
+    });
+    syncSoundBtn();
+
+    // ---- Uptime -----------------------------------------------------------
+    // A real stream shows how long it has been up; this one counts from the
+    // moment the page opened, which is the honest version of the same thing.
+    const started = Date.now();
+    const uptimeEl = document.getElementById('uptime');
+    setInterval(() => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      const pad = (n) => String(n).padStart(2, '0');
+      uptimeEl.textContent =
+        `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
+    }, 1000);
+
+    // ---- Viewer count -----------------------------------------------------
+    // It only ever wobbles between 2 and 3: the joke is that the audience is
+    // the two of them, plus the occasional cat walking over a keyboard.
+    const viewersEl = document.getElementById('viewers');
+    setInterval(() => {
+      const n = Math.random() < 0.25 ? 3 : 2;
+      viewersEl.textContent = `👀 ${n} watching`;
+    }, 7000);
+
+    // ---- Chat -------------------------------------------------------------
+    const chat = document.getElementById('chat');
+    const sayInput = document.getElementById('sayInput');
+    const sayBtn = document.getElementById('sayBtn');
+
+    const LINES = [
+      ['Jakub', 'welcome to the stream 💕'],
+      ['mrkvička 🐈', 'mrrrp'],
+      ['Jakub', 'that one on the left is my favourite'],
+      ['koťátko 🐱', 'meow meow meow'],
+      ['Jakub', 'still thinking about you btw'],
+      ['maple 🍁', 'purrrrrrr'],
+      ['Jakub', 'no idea how they sleep that much'],
+      ['koťátko 🐱', 'zzzzz'],
+      ['Jakub', 'the stream never stops, just like me missing you'],
+      ['mrkvička 🐈', 'knocked something off the table again'],
+      ['Jakub', 'ťuťuťu'],
+      ['maple 🍁', 'Canada approves 🇨🇦'],
+      ['koťátko 🐱', 'wants snacks. always.'],
+      ['Jakub', 'ok one more hour of watching cats then bed'],
+      ['mrkvička 🐈', '🐾🐾🐾'],
+      ['Jakub', 'miluju tě 💕'],
+    ];
+
+    let li = 0;
+    function push(who, text, mine) {
+      const el = document.createElement('div');
+      el.className = 'msg' + (mine ? ' mine' : '');
+      const w = document.createElement('span');
+      w.className = 'who';
+      w.textContent = who;
+      el.appendChild(w);
+      el.appendChild(document.createTextNode(text));
+      chat.appendChild(el);
+      // Keep the log short so it never grows without bound over a long watch.
+      while (chat.children.length > 40) chat.removeChild(chat.firstChild);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    // Seed a few so the chat is never an empty box, then trickle.
+    for (let i = 0; i < 3; i++) { const [w, t] = LINES[li++]; push(w, t); }
+    setInterval(() => {
+      const [w, t] = LINES[li++ % LINES.length];
+      push(w, t);
+    }, 6500);
+
+    function send() {
+      const text = sayInput.value.trim();
+      if (!text) return;
+      push('Emi 💗', text, true);
+      sayInput.value = '';
+      // He is always watching this stream, so he always answers.
+      setTimeout(() => {
+        const replies = [
+          'I saw that 💕', 'haha same', 'the cats agree',
+          'miss you 🩵', 'ťuťuťu', 'noted 🐾',
+        ];
+        push('Jakub', replies[Math.floor(Math.random() * replies.length)]);
+      }, 1200 + Math.random() * 1200);
+    }
+    sayBtn.addEventListener('click', send);
+    sayInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+  </script>
+</body>
+</html>

@@ -407,6 +407,53 @@
     100% { opacity: 0; }
   }
 
+  /* Kitten Cam card: hidden until the first round is completed, then it
+     unfolds in place. Once unlocked it stays unlocked across visits. */
+  .cam-card {
+    display: none;
+    text-align: center;
+    border-color: #7a3554;
+  }
+  .cam-card.unlocked { display: block; animation: camReveal 0.7s ease; }
+  @keyframes camReveal {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  .cam-card .cam-emoji {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 6px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .cam-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ff3355;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .cam-live .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cam-card.unlocked, .cam-card .cam-emoji, .cam-live .dot { animation: none; }
+  }
+
   .star-badge {
     position: fixed;
     right: 16px;
@@ -664,6 +711,15 @@
       </div>
     </section>
 
+    <section class="card cam-card" id="camCard">
+      <span class="cam-emoji">🐱</span>
+      <span class="cam-live"><span class="dot"></span>Live now</span>
+      <h2 style="justify-content:center;">You unlocked the Kitten Cam!</h2>
+      <p>Finding a whole round of them earned you the real thing: a stream of
+        actual kittens, running non-stop. 💕</p>
+      <a class="btn" href="/emi/live/">📺 Watch the Kitten Cam</a>
+    </section>
+
     <footer>tvůj Jakub 🩵</footer>
   </div>
 
@@ -674,6 +730,23 @@
     // Feature flags — the spin-the-heart-into-a-cat easter egg is built and
     // working. Drag the heart to spin it into a cat!
     const SECRET_CAT_ENABLED = true;
+
+    // Completing a round unlocks the Kitten Cam, and it stays unlocked on
+    // later visits. localStorage can throw (private mode, blocked site data),
+    // so every access is guarded and the card simply reveals for the session.
+    const CAM_KEY = 'emi.camUnlocked';
+
+    function camAlreadyUnlocked() {
+      try { return localStorage.getItem(CAM_KEY) === '1'; } catch (e) { return false; }
+    }
+
+    function unlockKittenCam(announce) {
+      const card = document.getElementById('camCard');
+      if (!card || card.classList.contains('unlocked')) return;
+      card.classList.add('unlocked');
+      try { localStorage.setItem(CAM_KEY, '1'); } catch (e) { /* session only */ }
+      if (announce) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
     // The 3D particle hero ships everywhere now, phones included — the particle
     // budget already halves on narrow screens. Append ?3d=0 to fall back to the
@@ -1095,6 +1168,8 @@
           kiss.remove();
           flash.remove();
           awardStar();
+          // The first completed round is what earns the stream.
+          unlockKittenCam(true);
           round++;
           scatterRound();
           // Re-open scoring only once the new round is on the page, otherwise
@@ -1141,6 +1216,9 @@
 
     // Placement measures real layout, so wait until notes have rendered and
     // the cards have settled at their final heights.
+    // Returning visitors keep the stream they already earned.
+    if (camAlreadyUnlocked()) unlockKittenCam(false);
+
     renderMessages().finally(() => {
       requestAnimationFrame(() => requestAnimationFrame(renderHiddenKittens));
     });
