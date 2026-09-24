@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="cs" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- cv/index.html is generated from content/cv.md + scripts/cv-template.html by `npm run cv:build` -->
+
+  <title>Jakub Vonášek · CV</title>
+  <meta name="description" content="AI vývojář a solo founder. MakeIt3D, AI asistenti pro zdravotní pojišťovnu, 3D měření osob." />
+  <meta name="author" content="Jakub Vonášek" />
+
+  <!-- Shared by direct link only: keep it out of search results -->
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- Open Graph / link previews (SMS, iMessage, WhatsApp) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Jakub.dev" />
+  <meta property="og:url" content="https://jakub-dev.com/cv/" />
+  <meta property="og:title" content="Jakub Vonášek · CV" />
+  <meta property="og:description" content="AI vývojář a solo founder. MakeIt3D, AI asistenti pro zdravotní pojišťovnu, 3D měření osob." />
+  <meta property="og:image" content="https://jakub-dev.com/cv/og.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Jakub Vonášek · CV · Founder · AI &amp; Full-Stack Engineer" />
+  <meta property="og:locale" content="cs_CZ" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Jakub Vonášek · CV" />
+  <meta name="twitter:description" content="AI vývojář a solo founder. MakeIt3D, AI asistenti pro zdravotní pojišťovnu, 3D měření osob." />
+  <meta name="twitter:image" content="https://jakub-dev.com/cv/og.png" />
+
+  <!-- Icons -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+
+  <!-- Theme Colors (light & dark) -->
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+
+  <style>
+    /* Site palette: dark by default, light when the system asks for it */
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --body: #d4d4d4;
+      --muted: #a3a3a3;
+      --rule: #262626;
+      --control: #6b6b6b;
+      --accent: #4dabf7;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #ffffff;
+        --text: #0a0a0a;
+        --body: #262626;
+        --muted: #5c5c5c;
+        --rule: #e5e5e5;
+        --control: #8a8a8a;
+        --accent: #1971c2;
+      }
+    }
+
+    /* Base */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--body);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      font-size: 1rem;
+      line-height: 1.65;
+      overflow-wrap: break-word;
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+    @media (min-width: 640px) {
+      body {
+        font-size: 1.0625rem;
+      }
+      main {
+        padding: 88px 32px 120px;
+      }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: var(--control);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.2em;
+      transition: color 0.2s ease, text-decoration-color 0.2s ease;
+    }
+    a:hover {
+      color: var(--accent);
+      text-decoration-color: currentColor;
+    }
+    a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+    strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Header: name, subtitle, contact line, download button */
+    h1 {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(2rem, 1.4rem + 2.6vw, 2.75rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+    }
+    .subtitle {
+      margin: 0.75rem 0 0;
+      color: var(--muted);
+      font-size: 1.125rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    .subtitle strong {
+      color: inherit;
+    }
+    .contact {
+      margin: 0.5rem 0 0;
+      color: var(--muted);
+      font-size: 0.9375rem;
+      line-height: 1.9;
+    }
+    .contact a {
+      padding-block: 0.35em; /* taller tap targets without changing the line */
+    }
+    .pdf-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 44px;
+      margin-top: 1.5rem;
+      padding: 0.625rem 1rem;
+      border: 1px solid var(--control);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      line-height: 1.2;
+      text-decoration: none;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .pdf-button:hover {
+      color: var(--text);
+      border-color: var(--text);
+      background-color: var(--rule);
+    }
+    .pdf-button:focus-visible {
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+    .pdf-button svg {
+      flex: none;
+    }
+
+    /* Sections: an hr in the source becomes a hairline above the section */
+    .cv-section {
+      margin-top: 2.5rem;
+    }
+    .cv-section.divided {
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--rule);
+    }
+    .cv-section > * + *,
+    .entry > * + * {
+      margin-top: 0.6rem;
+    }
+    h2 {
+      margin: 0 0 1.25rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    p,
+    ul {
+      margin: 0;
+    }
+
+    /* Roles and projects */
+    .entry + .entry {
+      margin-top: 1.75rem;
+    }
+    h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 1.0625rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .entry > .meta {
+      margin-top: 0.125rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    ul {
+      padding-left: 1.25rem;
+    }
+    li + li {
+      margin-top: 0.4rem;
+    }
+    li::marker {
+      color: var(--muted);
+    }
+    .line {
+      display: block;
+    }
+    .line + .line {
+      margin-top: 0.4rem;
+    }
+
+    /* Print / PDF: A4, black on white, nothing interactive */
+    @page {
+      size: A4;
+      margin: 15mm;
+    }
+    @media print {
+      :root {
+        --bg: #ffffff;
+        --text: #000000;
+        --body: #000000;
+        --muted: #444444;
+        --rule: #cccccc;
+        --control: #000000;
+        --accent: #000000;
+      }
+      *,
+      *::before,
+      *::after {
+        background: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+      body {
+        font-size: 10pt;
+        line-height: 1.42;
+      }
+      main {
+        max-width: none;
+        padding: 0;
+      }
+      .pdf-button {
+        display: none;
+      }
+      a {
+        text-decoration: none;
+      }
+      h1 {
+        font-size: 21pt;
+      }
+      .subtitle {
+        margin-top: 4pt;
+        font-size: 11.5pt;
+      }
+      .contact {
+        margin-top: 2pt;
+        font-size: 9.5pt;
+        line-height: 1.5;
+      }
+      .cv-section {
+        margin-top: 13pt;
+      }
+      .cv-section.divided {
+        padding-top: 13pt;
+      }
+      .cv-section > * + *,
+      .entry > * + * {
+        margin-top: 4pt;
+      }
+      h2 {
+        margin-bottom: 8pt;
+        font-size: 8pt;
+        break-after: avoid;
+      }
+      h3 {
+        font-size: 10.5pt;
+        break-after: avoid;
+      }
+      .entry + .entry {
+        margin-top: 10pt;
+      }
+      .entry > .meta {
+        margin-top: 0;
+        font-size: 9pt;
+      }
+      li + li,
+      .line + .line {
+        margin-top: 2pt;
+      }
+      .cv-header,
+      .entry {
+        break-inside: avoid;
+      }
+      p,
+      li {
+        orphans: 3;
+        widows: 3;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="cv-header">
+<h1>Bc. Jakub Vonášek</h1>
+<p class="subtitle"><strong>​</strong>Founder&nbsp;· AI &amp; Full-Stack Engineer<strong>​</strong></p>
+<p class="contact">Praha&nbsp;· +420&nbsp;731&nbsp;055&nbsp;181&nbsp;· <a href="mailto:jkb.vonasek@gmail.com">jkb.vonasek@gmail.com</a>&nbsp;· <a target="_blank" rel="noopener noreferrer" href="https://github.com/jakubvonasek">github.com/jakubvonasek</a>&nbsp;· <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/jakubvonasek/">linkedin.com/in/jakubvonasek</a>&nbsp;· <a target="_blank" rel="noopener noreferrer" href="https://makeit3d.app">makeit3d.app</a></p>
+      <a class="pdf-button" href="/cv/Jakub_Vonasek_CV.pdf" download="Jakub_Vonasek_CV.pdf" type="application/pdf">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Stáhnout PDF
+      </a>
+    </header>
+<section class="cv-section divided">
+<h2>Profil</h2>
+<p>AI vývojář a&nbsp;solo founder. Stavím produkty end-to-end, a&nbsp;to od ML modelování a&nbsp;LLM aplikací přes full-stack vývoj až po nasazení a&nbsp;provoz v&nbsp;produkční infrastruktuře. Založil jsem a&nbsp;provozuji MakeIt3D, AI mikro SaaS pro převod obrázků do 3D modelů, který organicky roste díky dobře zvládnutému SEO. Mám dokonce mírnou zkušenost s&nbsp;výukou, vedl jsem programovací kroužky na gymnáziu a&nbsp;přednášel o&nbsp;AI.</p>
+</section>
+<section class="cv-section divided">
+<h2>Praxe</h2>
+<div class="entry">
+<h3>Founder&nbsp;· MakeIt3D</h3>
+<p class="meta">**​2025&nbsp;– současnost&nbsp;· <a href="%E2%80%8B*https://makeit3d.app">makeit3d.app</a>*<em>​  ​</em></p>
+<p>Celý produkt jsem postavil a&nbsp;provozuji sám: Next.js, Supabase/PostgreSQL, AI inference, analytika i&nbsp;SEO. Při vývoji dbám na automatizaci a&nbsp;minimální údržbu, aby provoz běžel bez ručních zásahů.</p>
+</div>
+<div class="entry">
+<h3>AI Developer&nbsp;· Styrax Consulting</h3>
+<p class="meta"><em>​</em>prosinec&nbsp;2024&nbsp;– říjen&nbsp;2026&nbsp;· zkrácený úvazek<em>​</em></p>
+<p>Návrh, implementace a&nbsp;správa AI/ML řešení, prototypování nových metod vytěžování dat ze snímků.</p>
+</div>
+<div class="entry">
+<h3>Programátor&nbsp;· STYRAX a.s.</h3>
+<p class="meta"><em>​</em>červen&nbsp;2022&nbsp;– prosinec&nbsp;2024&nbsp;· zkrácený úvazek<em>​</em></p>
+<p>Datové pumpy, automatizace interních procesů a&nbsp;testování informačních systémů.</p>
+</div>
+</section>
+<section class="cv-section divided">
+<h2>Projekty na kterých jsem pracoval</h2>
+<div class="entry">
+<h3>MakeIt3D&nbsp;· image-to-3D SaaS</h3>
+<ul>
+<li>Vytvořil jsem ho a&nbsp;dostal do zisku. Organicky vyrostl zhruba na 30 tisíc uživatelů ročně, bez placené reklamy, čistě přes SEO (SSG, content clustery, JSON-LD schémata). Traffic chodí i&nbsp;z&nbsp;ChatGPT a&nbsp;dalších AI vyhledávačů.</li>
+<li>V&nbsp;produkci jsem běžně A/B testoval různé přístupy k&nbsp;inferenci. Zavedl jsem i&nbsp;posilované učení pro stanovení nejlepších strategií k&nbsp;3D rekonstrukci.</li>
+<li>Vybudoval jsem vlastní dashboard s&nbsp;realtime business KPI, podle kterých dělám strategická rozhodnutí.</li>
+</ul>
+</div>
+<div class="entry">
+<h3>AI asistenti a&nbsp;RAG pro zdravotní pojišťovnu&nbsp;· Styrax Consulting</h3>
+<ul>
+<li>Stavím a&nbsp;konfiguruji RAG a&nbsp;AI harness pro chatboty a&nbsp;AI asistenty (OpenWebUI, znalostní báze, pluginy).</li>
+<li>Analyzoval jsem prompt-injection útoky proti produkčnímu chatbotu, našel hlavní slabiny v&nbsp;architektuře a&nbsp;navrhl mitigace.</li>
+<li>Napsal jsem plugin do OpenWebUI, který pomocí LLM směruje dotazy na správné oddělení (async, aiohttp).</li>
+</ul>
+</div>
+<div class="entry">
+<h3>TAČR projekt&nbsp;· 3D měření osob</h3>
+<ul>
+<li>Navrhl a&nbsp;prototypoval jsem měření osob stereokamerou, od přípravy měřicího prostředí a&nbsp;kalibrace přes skenování až po samotnou rekonstrukci osob do 3D point cloudu.</li>
+<li>Implementace automtické měření osob z&nbsp;pouhých snímků.</li>
+</ul>
+</div>
+</section>
+<section class="cv-section divided">
+<h2>Výuka a&nbsp;přednášky</h2>
+<ul>
+<li>Vedl jsem programovací kroužky na gymnáziu, ještě jako tamní student.</li>
+<li>Dále jsem již jako VŠ student přednášel na gymnáziu (2× o&nbsp;AI) a&nbsp;párkrát na FIT ČVUT v&nbsp;rámci seminářů ze strojového učení. Více zkušeností s&nbsp;tutoringem nemám, ale rád nějaké získám. V&nbsp;oblasti UI jsem získal řadu znalostí a&nbsp;jsem připravený je předat dál.</li>
+</ul>
+</section>
+<section class="cv-section divided">
+<h2>Vzdělání</h2>
+<div class="entry">
+<h3>Navazující magisterské studium&nbsp;· Umělá inteligence</h3>
+<p class="meta"><strong>​</strong>FIT ČVUT v&nbsp;Praze<strong>​</strong>&nbsp;· <em>​</em>2026&nbsp;– současnost<em>​</em></p>
+</div>
+<div class="entry">
+<h3>Semestr na výmenném pobytu</h3>
+<p class="meta"><strong>​</strong>Nanyang Technological University Singapore<strong>​</strong>&nbsp;· <em>​</em>září&nbsp;2024&nbsp;– prosinec&nbsp;2024<em>​</em></p>
+</div>
+<div class="entry">
+<h3>Bakalářské studium&nbsp;· Umělá inteligence</h3>
+<p class="meta"><strong>​</strong>FIT ČVUT v&nbsp;Praze<strong>​</strong>&nbsp;· <em>​</em>2021&nbsp;– 2026<em>​</em></p>
+<ul>
+<li>Bakalářská práce: predikce Alzheimerovy choroby z&nbsp;dat pojistných událostí, XGBoost model s&nbsp;AUC 0,781–&#8288;0,843.</li>
+<li>Relevantní oblasti: strojové učení, strojové vidění, UI, kryptografie, databáze, počítačové sítě a&nbsp;silný matematický základ.</li>
+</ul>
+</div>
+</section>
+<section class="cv-section divided">
+<h2>Dovednosti</h2>
+<p><strong>​</strong>AI / ML:<strong>​</strong> LLM a&nbsp;VLM integrace, RAG, AI agenti vč. coding agentů, AI a&nbsp;SW bezpečnost (prompt injection), počítačové vidění a&nbsp;3D rekonstrukce, XGBoost, A/B testování</p>
+<p><strong>​</strong>Full-stack:<strong>​</strong> TypeScript, Python, C++, Next.js (App Router, SSG), FastAPI, Supabase, PostgreSQL, REST API, distribuované programování</p>
+<p><strong>​</strong>Data:<strong>​</strong> SQL, explorační datové analýzy, datové transformace a&nbsp;předzpracování</p>
+<p><strong>​</strong>DevOps:<strong>​</strong> Vercel, Docker, Kubernetes, Nginx, SSL, SSH</p>
+<p><strong>​</strong>Další:<strong>​</strong> Programmatic SEO, 3D grafika</p>
+</section>
+<section class="cv-section divided">
+<h2>Jazyky</h2>
+<p>Čeština (rodilý mluvčí)&nbsp;· Angličtina C2&nbsp;· Němčina B2&nbsp;· Španělština A2</p>
+</section>
+<section class="cv-section">
+<h2>Zájmy</h2>
+<p>Hudební produkce, sport, robotika</p>
+</section>
+  </main>
+</body>
+</html>

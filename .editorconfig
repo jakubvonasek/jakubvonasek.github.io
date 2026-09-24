@@ -1,0 +1,5 @@
+root = true
+
+# Two trailing spaces are Markdown hard line breaks (content/cv.md uses them)
+[*.md]
+trim_trailing_whitespace = false

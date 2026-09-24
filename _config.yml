@@ -1,0 +1,8 @@
+# GitHub Pages builds this repo with Jekyll. The site is plain static HTML;
+# this only keeps the tooling and the CV's Markdown source out of the published site.
+exclude:
+  - content/
+  - scripts/
+  - node_modules/
+  - package.json
+  - package-lock.json

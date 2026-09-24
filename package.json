@@ -1,0 +1,16 @@
+{
+  "name": "jakub-dev",
+  "private": true,
+  "type": "module",
+  "description": "Tooling for jakub-dev.com. The site itself is static and has no build step.",
+  "scripts": {
+    "serve": "python3 -m http.server 3000",
+    "cv:build": "node scripts/cv-build.mjs",
+    "cv:pdf": "node scripts/cv-pdf.mjs",
+    "cv:og": "node scripts/cv-og.mjs"
+  },
+  "devDependencies": {
+    "marked": "^18.0.14",
+    "playwright": "^1.63.0"
+  }
+}
