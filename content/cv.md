@@ -1,6 +1,6 @@
 # Bc. Jakub Vonášek
 
-**​**Founder · AI & Full-Stack Engineer**​**
+**Founder · AI & Full-Stack Engineer**
 
 Praha · +420 731 055 181 · jkb.vonasek@gmail.com · [github.com/jakubvonasek](https://github.com/jakubvonasek) · [linkedin.com/in/jakubvonasek](https://www.linkedin.com/in/jakubvonasek/) · [makeit3d.app](https://makeit3d.app)
 
@@ -16,19 +16,19 @@ AI vývojář a solo founder. Stavím produkty end-to-end, a to od ML modelován
 
 ### Founder · MakeIt3D
 
-**​2025 – současnost · [makeit3d.app](​*https://makeit3d.app)**​
+*2025 – současnost · [makeit3d.app](https://makeit3d.app)*
 
 Celý produkt jsem postavil a provozuji sám: Next.js, Supabase/PostgreSQL, AI inference, analytika i SEO. Při vývoji dbám na automatizaci a minimální údržbu, aby provoz běžel bez ručních zásahů.
 
 ### AI Developer · Styrax Consulting
 
-*​*prosinec 2024 – říjen 2026 · zkrácený úvazek*​*
+*prosinec 2024 – říjen 2026 · zkrácený úvazek*
 
 Návrh, implementace a správa AI/ML řešení, prototypování nových metod vytěžování dat ze snímků.
 
 ### Programátor · STYRAX a.s.
 
-*​*červen 2022 – prosinec 2024 · zkrácený úvazek*​*
+*červen 2022 – prosinec 2024 · zkrácený úvazek*
 
 Datové pumpy, automatizace interních procesů a testování informačních systémů.
 
@@ -66,15 +66,15 @@ Datové pumpy, automatizace interních procesů a testování informačních sys
 
 ### Navazující magisterské studium · Umělá inteligence
 
-**​**FIT ČVUT v Praze**​** · *​*2026 – současnost*​*
+**FIT ČVUT v Praze** · *2026 – současnost*
 
 ### Semestr na výmenném pobytu
 
-**​**Nanyang Technological University Singapore**​** · *​*září 2024 – prosinec 2024*​*
+**Nanyang Technological University Singapore** · *září 2024 – prosinec 2024*
 
 ### Bakalářské studium · Umělá inteligence
 
-**​**FIT ČVUT v Praze**​** · *​*2021 – 2026*​*
+**FIT ČVUT v Praze** · *2021 – 2026*
 
 - Bakalářská práce: predikce Alzheimerovy choroby z dat pojistných událostí, XGBoost model s AUC 0,781–0,843.
 - Relevantní oblasti: strojové učení, strojové vidění, UI, kryptografie, databáze, počítačové sítě a silný matematický základ.
@@ -83,15 +83,15 @@ Datové pumpy, automatizace interních procesů a testování informačních sys
 
 ## Dovednosti
 
-**​**AI / ML:**​** LLM a VLM integrace, RAG, AI agenti vč. coding agentů, AI a SW bezpečnost (prompt injection), počítačové vidění a 3D rekonstrukce, XGBoost, A/B testování
+**AI / ML:** LLM a VLM integrace, RAG, AI agenti vč. coding agentů, AI a SW bezpečnost (prompt injection), počítačové vidění a 3D rekonstrukce, XGBoost, A/B testování
 
-**​**Full-stack:**​** TypeScript, Python, C++, Next.js (App Router, SSG), FastAPI, Supabase, PostgreSQL, REST API, distribuované programování
+**Full-stack:** TypeScript, Python, C++, Next.js (App Router, SSG), FastAPI, Supabase, PostgreSQL, REST API, distribuované programování
 
-**​**Data:**​** SQL, explorační datové analýzy, datové transformace a předzpracování
+**Data:** SQL, explorační datové analýzy, datové transformace a předzpracování
 
-**​**DevOps:**​** Vercel, Docker, Kubernetes, Nginx, SSL, SSH
+**DevOps:** Vercel, Docker, Kubernetes, Nginx, SSL, SSH
 
-**​**Další:**​** Programmatic SEO, 3D grafika
+**Další:** Programmatic SEO, 3D grafika
 
 ---
 
