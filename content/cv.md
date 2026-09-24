@@ -16,7 +16,7 @@ AI vývojář a solo founder. Stavím produkty end-to-end, a to od ML modelován
 
 ### Founder · MakeIt3D
 
-**​2025 – současnost · [makeit3d.app](​*https://makeit3d.app)**​  ​*
+**​2025 – současnost · [makeit3d.app](​*https://makeit3d.app)**​
 
 Celý produkt jsem postavil a provozuji sám: Next.js, Supabase/PostgreSQL, AI inference, analytika i SEO. Při vývoji dbám na automatizaci a minimální údržbu, aby provoz běžel bez ručních zásahů.
 
