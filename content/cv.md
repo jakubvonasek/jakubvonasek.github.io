@@ -8,7 +8,7 @@ Praha · +420 731 055 181 · jkb.vonasek@gmail.com · [github.com/jakubvonasek](
 
 ## Profil
 
-AI vývojář a solo founder. Stavím produkty end-to-end, a to od ML modelování a LLM aplikací přes full-stack vývoj až po nasazení a provoz v produkční infrastruktuře. Založil jsem a provozuji MakeIt3D, AI mikro SaaS pro převod obrázků do 3D modelů, který organicky roste díky dobře zvládnutému SEO. Mám mírnou zkušenost s výukou, vedl jsem programovací kroužky na gymnáziu a přednášel o AI.
+AI vývojář a solo founder. Stavím produkty end-to-end, a to od ML modelování a LLM aplikací přes full-stack vývoj až po nasazení a provoz v produkční infrastruktuře. Založil jsem a provozuji MakeIt3D, AI mikro SaaS pro převod obrázků do 3D modelů, který organicky roste díky dobře zvládnutému SEO. Mám i mírnou zkušenost s výukou, vedl jsem programovací kroužky na gymnáziu a přednášel o AI.
 
 ---
 
