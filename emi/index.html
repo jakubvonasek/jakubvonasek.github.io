@@ -771,7 +771,9 @@
     font-size: 14px;
   }
 
-  /* Canada welcome overlay */
+  /* Golden-fall welcome overlay: a dusk sky over a layered maple forest
+     (drawn in SVG at the viewport's own size), with leaves drifting down
+     and kittens hopping out of leaf piles. */
   .welcome-overlay {
     position: fixed;
     inset: 0;
@@ -779,9 +781,29 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at top, #6b1f45 0%, #2a0a1a 70%);
+    background: linear-gradient(180deg, #2a0a1a 0%, #5a1f30 22%, #a8452c 44%,
+                #e88a38 60%, #f7c25a 74%, #f7c25a 100%);
     overflow: hidden;
     animation: overlayFade 0.6s ease;
+  }
+  .welcome-sun {
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    width: 80vmax;
+    height: 80vmax;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,236,160,0.85) 0%,
+                rgba(255,190,90,0.35) 18%, rgba(255,140,60,0) 48%);
+    pointer-events: none;
+  }
+  .welcome-forest {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
   }
   @keyframes overlayFade {
     from { opacity: 0; }
@@ -793,21 +815,35 @@
   @keyframes overlayOut {
     to { opacity: 0; visibility: hidden; }
   }
+  /* A frosted panel keeps the text readable over the busy forest. */
   .welcome-box {
     position: relative;
     z-index: 3;
     text-align: center;
-    padding: 36px 30px;
+    padding: 30px 28px;
+    margin: 0 16px;
     max-width: 420px;
+    background: rgba(42,10,26,0.55);
+    border: 1px solid rgba(255,200,120,0.25);
+    border-radius: 22px;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
   }
   .welcome-box .maple-emoji {
+    display: inline-block;
     font-size: 48px;
+    animation: mapleSway 3s ease-in-out infinite;
+  }
+  @keyframes mapleSway {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
   }
   .welcome-box h2 {
     font-size: 30px;
     margin: 12px 0 8px;
     color: #fff0f6;
-    text-shadow: 0 2px 12px rgba(255,79,154,0.6);
+    text-shadow: 0 2px 14px rgba(255,170,80,0.6);
   }
   .welcome-box p {
     color: #ffd6e8;
@@ -816,7 +852,7 @@
     margin: 0 0 20px;
   }
   .welcome-box button {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    background: linear-gradient(90deg, #ffc15e, var(--accent));
     color: #2a0a1a;
     border: none;
     padding: 12px 26px;
@@ -825,31 +861,58 @@
     font-size: 15px;
     cursor: pointer;
   }
+  /* The outer element falls and drifts with the wind; the inner glyph sways
+     side to side like a real leaf. Near leaves pass in front of the panel,
+     blurred, for depth. */
   .leaf {
     position: absolute;
-    top: -40px;
-    font-size: 22px;
-    z-index: 1;
-    animation-name: leafFall;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
+    top: -60px;
+    z-index: 2;
+    line-height: 1;
+    pointer-events: none;
+    animation: leafFall linear infinite;
+  }
+  .leaf.near { z-index: 4; filter: blur(1.5px); }
+  .leaf span {
+    display: inline-block;
+    animation: leafSway ease-in-out infinite alternate;
   }
   @keyframes leafFall {
-    0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0.9; }
-    100% { transform: translateY(110vh) translateX(40px) rotate(360deg); opacity: 0.9; }
+    to { transform: translate(var(--drift, 60px), calc(100vh + 120px)); }
   }
-  .kitten {
+  @keyframes leafSway {
+    from { transform: translateX(calc(var(--sway, 20px) * -1)) rotate(-35deg); }
+    to { transform: translateX(var(--sway, 20px)) rotate(35deg); }
+  }
+  .kitten-pile {
     position: absolute;
-    bottom: -10px;
-    font-size: 30px;
+    bottom: 1.5vh;
     z-index: 2;
-    animation-name: kittenBounce;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
+    transform: translateX(-50%);
+    text-align: center;
+    line-height: 1;
+    pointer-events: none;
   }
-  @keyframes kittenBounce {
-    0%, 100% { transform: translateY(0) scaleX(1); }
-    50% { transform: translateY(-14px) scaleX(1); }
+  .kitten-pile .kitten {
+    display: block;
+    font-size: 28px;
+    animation: kittenHop ease-in-out infinite;
+  }
+  .kitten-pile .pile {
+    position: relative;
+    display: block;
+    margin-top: -16px;
+    font-size: 22px;
+    letter-spacing: -9px;
+    white-space: nowrap;
+  }
+  @keyframes kittenHop {
+    0%, 55%, 100% { transform: translateY(14px); }
+    70% { transform: translateY(-24px) rotate(-8deg); }
+    85% { transform: translateY(6px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .leaf, .leaf span, .kitten-pile .kitten, .welcome-box .maple-emoji { animation: none; }
   }
 
   @media (max-width: 480px) {
@@ -885,13 +948,18 @@
 </head>
 <body>
   <div class="welcome-overlay" id="welcomeOverlay" style="display:none;">
+    <div class="welcome-sun"></div>
+    <svg class="welcome-forest" id="welcomeForest" aria-hidden="true"
+         preserveAspectRatio="xMidYMax slice"></svg>
     <div id="leavesLayer"></div>
     <div id="kittensLayer"></div>
     <div class="welcome-box">
       <div class="maple-emoji">🍁</div>
-      <h2>Welcome to Canada, Emi! 🇨🇦</h2>
-      <p>The country of maple leaves and so many kittens ready for you to find. 💕</p>
-      <button onclick="closeWelcomeOverlay()">Let's go find more kittens 🐾</button>
+      <h2>Canada turned golden, Emi! 🍂</h2>
+      <p>You've been here a little while now, and the maples dressed up in gold
+        and red just for you. Crunchy leaves, hot tea, and kittens still hiding
+        everywhere. 💕</p>
+      <button onclick="closeWelcomeOverlay()">Let's go crunch some leaves 🍁</button>
     </div>
   </div>
 
@@ -1330,30 +1398,141 @@
       const overlay = document.getElementById('welcomeOverlay');
       overlay.style.display = 'flex';
 
-      const leaves = ['🍁', '🍂'];
+      const pick = list => list[Math.floor(Math.random() * list.length)];
+      const narrow = overlay.clientWidth < 480;
+
+      drawFallForest(document.getElementById('welcomeForest'),
+                     overlay.clientWidth, overlay.clientHeight);
+
+      // 🍁 is red; a small hue shift gives the orange and gold ones (any more
+      // and its yellow parts turn green, so 🍂 is left as it is). Negative
+      // delays start every leaf mid-fall, so the sky is full from the first
+      // frame instead of filling up over several seconds.
+      const leaves = ['🍁', '🍁', '🍁', '🍂', '🍂'];
+      const tints = ['none', 'hue-rotate(12deg) saturate(1.15)',
+                     'hue-rotate(24deg) saturate(1.25) brightness(1.08)'];
       const leavesLayer = document.getElementById('leavesLayer');
-      for (let i = 0; i < 22; i++) {
+      const leafCount = narrow ? 22 : 36;
+      for (let i = 0; i < leafCount; i++) {
+        const near = i < 4;
+        const fall = near ? 5 + Math.random() * 2 : 8 + Math.random() * 7;
         const leaf = document.createElement('div');
-        leaf.className = 'leaf';
-        leaf.textContent = leaves[Math.floor(Math.random() * leaves.length)];
-        leaf.style.left = `${Math.random() * 100}%`;
-        leaf.style.fontSize = `${16 + Math.random() * 16}px`;
-        leaf.style.animationDuration = `${6 + Math.random() * 6}s`;
-        leaf.style.animationDelay = `${Math.random() * 8}s`;
+        leaf.className = 'leaf' + (near ? ' near' : '');
+        leaf.style.left = `${-10 + Math.random() * 105}%`;
+        leaf.style.setProperty('--drift', `${-40 + Math.random() * 180}px`);
+        leaf.style.animationDuration = `${fall}s`;
+        leaf.style.animationDelay = `${-Math.random() * fall}s`;
+        const glyph = document.createElement('span');
+        glyph.textContent = pick(leaves);
+        glyph.style.fontSize = `${near ? 40 + Math.random() * 18 : 14 + Math.random() * 16}px`;
+        if (glyph.textContent === '🍁') glyph.style.filter = pick(tints);
+        glyph.style.setProperty('--sway', `${10 + Math.random() * 30}px`);
+        glyph.style.animationDuration = `${1.6 + Math.random() * 1.8}s`;
+        glyph.style.animationDelay = `${-Math.random() * 3}s`;
+        leaf.appendChild(glyph);
         leavesLayer.appendChild(leaf);
       }
 
+      // Kittens hiding in leaf piles along the bottom, popping out now and then.
       const kittens = ['🐱', '🐈', '🐈‍⬛', '🐈'];
       const kittensLayer = document.getElementById('kittensLayer');
-      for (let i = 0; i < 20; i++) {
-        const kitten = document.createElement('div');
+      const piles = narrow ? 4 : 7;
+      for (let i = 0; i < piles; i++) {
+        const pile = document.createElement('div');
+        pile.className = 'kitten-pile';
+        pile.style.left = `${(i + 0.5) / piles * 100 + (Math.random() - 0.5) * 6}%`;
+        const kitten = document.createElement('span');
         kitten.className = 'kitten';
-        kitten.textContent = kittens[Math.floor(Math.random() * kittens.length)];
-        kitten.style.left = `${5 + Math.random() * 90}%`;
-        kitten.style.fontSize = `${24 + Math.random() * 14}px`;
-        kitten.style.animationDuration = `${1.4 + Math.random() * 1.2}s`;
-        kitten.style.animationDelay = `${Math.random() * 1.5}s`;
-        kittensLayer.appendChild(kitten);
+        kitten.textContent = pick(kittens);
+        kitten.style.animationDuration = `${2.2 + Math.random() * 1.6}s`;
+        kitten.style.animationDelay = `${-Math.random() * 3}s`;
+        const leavesPile = document.createElement('span');
+        leavesPile.className = 'pile';
+        leavesPile.textContent = Array.from({ length: 4 }, () => pick(['🍂', '🍁'])).join('');
+        pile.append(kitten, leavesPile);
+        kittensLayer.appendChild(pile);
+      }
+    }
+
+    // Three rows of fall trees on rolling hills, far to near. Farther rows are
+    // smaller and more transparent, so they fade into the dusk like haze. The
+    // nearest row stays at the edges to frame the message.
+    function drawFallForest(svg, w, h) {
+      const NS = 'http://www.w3.org/2000/svg';
+      const FALL = ['#ffd35c', '#f5b82e', '#f08c24', '#e0601f', '#c7321f', '#9e1f2a', '#b8561d'];
+      const SPRUCE = ['#1d3a33', '#24443a', '#2b4a3a'];
+      const pick = list => list[Math.floor(Math.random() * list.length)];
+      const between = (a, b) => a + Math.random() * (b - a);
+      const add = (tag, attrs, parent) => {
+        const el = document.createElementNS(NS, tag);
+        for (const k in attrs) el.setAttribute(k, attrs[k]);
+        parent.appendChild(el);
+        return el;
+      };
+
+      function maple(g, x, base, size) {
+        const tw = Math.max(2, size * 0.06), th = size * 0.45;
+        add('path', { d: `M${x - tw / 2} ${base} L${x - tw * 0.3} ${base - th} ` +
+                         `L${x + tw * 0.3} ${base - th} L${x + tw / 2} ${base} Z`,
+                      fill: '#3a1812' }, g);
+        const cy = base - size * 0.64, r = size * 0.3, main = pick(FALL);
+        // Shadow underneath, then the crown in clustered blobs, then sunlight.
+        add('circle', { cx: x + r * 0.15, cy: cy + r * 0.2, r: r * 0.95, fill: '#4a1414', opacity: 0.55 }, g);
+        for (let i = 0; i < 7; i++) {
+          const a = Math.random() * Math.PI * 2, d = r * between(0.15, 0.6);
+          add('circle', { cx: x + Math.cos(a) * d * 1.1, cy: cy + Math.sin(a) * d * 0.8,
+                          r: r * between(0.42, 0.7),
+                          fill: Math.random() < 0.7 ? main : pick(FALL) }, g);
+        }
+        add('circle', { cx: x - r * 0.3, cy: cy - r * 0.35, r: r * 0.35, fill: '#ffe08a', opacity: 0.3 }, g);
+      }
+
+      function spruce(g, x, base, size) {
+        const tw = Math.max(2, size * 0.05);
+        add('rect', { x: x - tw / 2, y: base - size * 0.2, width: tw, height: size * 0.2, fill: '#2a140f' }, g);
+        const fill = pick(SPRUCE);
+        for (let i = 0; i < 3; i++) {
+          const half = size * 0.2 * (1 - i * 0.25);
+          const bottom = base - size * (0.12 + i * 0.24);
+          add('path', { d: `M${x - half} ${bottom} L${x} ${bottom - size * 0.42} L${x + half} ${bottom} Z`, fill }, g);
+        }
+      }
+
+      function hill(g, y, amp, fill) {
+        const steps = Math.max(4, Math.round(w / 160));
+        let d = `M0 ${h} L0 ${y}`;
+        for (let i = 1; i <= steps; i++) {
+          const x = w * i / steps;
+          d += ` Q${x - w / steps / 2} ${y - amp * between(0.5, 1.5)} ${x} ${y + between(-0.5, 0.5) * amp}`;
+        }
+        add('path', { d: `${d} L${w} ${h} Z`, fill }, g);
+      }
+
+      const rows = [
+        { ground: 0.70, size: [0.13, 0.19], gap: 22, spruce: 0.3, opacity: 0.45, hill: '#6b2a22' },
+        { ground: 0.81, size: [0.19, 0.27], gap: 44, spruce: 0.2, opacity: 0.75, hill: '#7a3020' },
+        { ground: 0.94, size: [0.32, 0.44], gap: 70, spruce: 0.15, opacity: 1, hill: '#8a3a1c', edges: true },
+      ];
+
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      svg.textContent = '';
+      rows.forEach(row => {
+        const g = add('g', { opacity: row.opacity }, svg);
+        const ground = h * row.ground;
+        for (let x = -row.gap / 2; x < w + row.gap; x += row.gap * between(0.7, 1.3)) {
+          if (row.edges && x > w * 0.2 && x < w * 0.8) continue;
+          const size = h * between(row.size[0], row.size[1]);
+          const base = ground + between(0, h * 0.02);
+          (Math.random() < row.spruce ? spruce : maple)(g, x, base, size);
+        }
+        hill(g, ground + h * 0.01, h * 0.012, row.hill);
+      });
+
+      // A carpet of fallen leaves on the nearest hill.
+      const carpet = add('g', {}, svg);
+      for (let i = 0; i < Math.round(w / 8); i++) {
+        add('ellipse', { cx: Math.random() * w, cy: between(h * 0.955, h), rx: between(2, 5),
+                         ry: between(1.2, 2.6), fill: pick(FALL), opacity: 0.85 }, carpet);
       }
     }
 
