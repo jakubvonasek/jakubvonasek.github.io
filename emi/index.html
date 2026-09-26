@@ -815,6 +815,35 @@
   @keyframes overlayOut {
     to { opacity: 0; visibility: hidden; }
   }
+  /* Top-left pill that reopens the welcome screen. It scrolls away with the
+     page rather than staying fixed, so it never sits over card content. */
+  .back-to-welcome {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px 0 12px;
+    background: #4a1c34;
+    border: 1px solid #7a3554;
+    border-radius: 999px;
+    color: var(--accent2);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  }
+  .back-to-welcome .arrow {
+    font-size: 18px;
+    font-weight: 700;
+    transition: transform 0.2s ease;
+  }
+  .back-to-welcome:hover .arrow { transform: translateX(-3px); }
+  .back-to-welcome:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; }
+
   /* A frosted panel keeps the text readable over the busy forest. */
   .welcome-box {
     position: relative;
@@ -962,6 +991,11 @@
       <button onclick="closeWelcomeOverlay()">Let's go crunch some leaves 🍁</button>
     </div>
   </div>
+
+  <button class="back-to-welcome" onclick="openWelcomeOverlay()"
+          aria-label="Back to the first screen" title="Back to the golden fall">
+    <span class="arrow">←</span>🍁
+  </button>
 
   <div class="wrap">
     <header>
@@ -1385,17 +1419,26 @@
 
     renderTeaGame();
 
+    let welcomeCloseTimer = null;
+
     function closeWelcomeOverlay() {
       const overlay = document.getElementById('welcomeOverlay');
       overlay.classList.add('closing');
-      setTimeout(() => { overlay.style.display = 'none'; }, 500);
+      welcomeCloseTimer = setTimeout(() => { overlay.style.display = 'none'; }, 500);
       sessionStorage.setItem('emiWelcomeSeen', '1');
     }
 
     function renderWelcomeOverlay() {
       if (sessionStorage.getItem('emiWelcomeSeen')) return;
+      openWelcomeOverlay();
+    }
 
+    // Also reached from the back arrow, so it rebuilds the scene from scratch
+    // (a fresh forest each time) and cancels a close that is still fading.
+    function openWelcomeOverlay() {
       const overlay = document.getElementById('welcomeOverlay');
+      clearTimeout(welcomeCloseTimer);
+      overlay.classList.remove('closing');
       overlay.style.display = 'flex';
 
       const pick = list => list[Math.floor(Math.random() * list.length)];
@@ -1412,6 +1455,7 @@
       const tints = ['none', 'hue-rotate(12deg) saturate(1.15)',
                      'hue-rotate(24deg) saturate(1.25) brightness(1.08)'];
       const leavesLayer = document.getElementById('leavesLayer');
+      leavesLayer.textContent = '';
       const leafCount = narrow ? 22 : 36;
       for (let i = 0; i < leafCount; i++) {
         const near = i < 4;
@@ -1436,6 +1480,7 @@
       // Kittens hiding in leaf piles along the bottom, popping out now and then.
       const kittens = ['🐱', '🐈', '🐈‍⬛', '🐈'];
       const kittensLayer = document.getElementById('kittensLayer');
+      kittensLayer.textContent = '';
       const piles = narrow ? 4 : 7;
       for (let i = 0; i < piles; i++) {
         const pile = document.createElement('div');
