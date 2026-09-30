@@ -22,13 +22,14 @@ links (`/postit/`, `/round-corners/`) don't resolve over `file://`.
 
 Hosted from the `jakubvonasek/jakubvonasek.github.io` repo — pushing to
 `master` publishes the site. `CNAME` points it at `jakub-dev.com`, and
-Vercel Analytics is loaded on the landing page.
+Google Analytics is loaded on the landing page.
 
 ## Structure
 
 | Path               | What it is                                        |
 | ------------------ | ------------------------------------------------- |
-| `index.html`       | Landing page — hero, projects, contact            |
+| `index.html`       | Landing page — hero, projects, tools, contact     |
+| `og.png`           | Landing page link-preview image (generated)       |
 | `minesweeper.html` | Browser Minesweeper                               |
 | `games/chess.html` | Browser chess                                     |
 | `postit/`          | PostIt — gradient backgrounds for screenshots     |
@@ -43,13 +44,14 @@ Vercel Analytics is loaded on the landing page.
 ## Notes
 
 `index.html` is self-contained: styles live in a single `<style>` block in
-the `<head>`, scripts sit at the end of `<body>`.
-
-The hero's AI prompt bar is a front-end piece with no backend — it matches
-the query against keywords in `REPLIES` and streams a canned answer that
-links to the relevant project. To wire it to a real model, replace
-`pickReply()` with a fetch. All of its animations are disabled under
+the `<head>`, scripts sit at the end of `<body>`. Colors are CSS custom
+properties on `:root` (the same palette as `/cv`), redefined for light mode
+under `prefers-color-scheme: light`; use the tokens rather than hard-coded
+colors. Text is set in Geist and Geist Mono from Google Fonts, with system
+fonts as the fallback. All animations are disabled under
 `prefers-reduced-motion`.
+
+`npm run og` redraws the landing page's link-preview image `og.png`.
 
 ## CV
 
